@@ -1,0 +1,164 @@
+tdaLibroCrear(ID, Titulo, Autor,L) :-
+    string_lower(Titulo, TituloBn),
+    string_lower(Autor, AutorBn),
+    L= [idLibro(ID),
+        tituloLibro(TituloBn),
+        autorLibro(AutorBn),
+        estado(disponible)       ].
+
+
+estadoLibros(disponible).
+estadoLibros(no_disponible).
+
+tdaLibroEsLibro([idLibro(ID),
+                 tituloLibro(Titulo),
+                autorLibro(Autor),
+                estado(Estado)]):-
+    integer(ID),
+    string(Titulo),
+    string(Autor),
+    estadoLibros(Estado).
+
+tdaLibroGetID(Libro, ID):-
+    tdaLibroEsLibro(Libro),
+    Libro= [idLibro(ID)|_].
+
+tdaLibroGetTitulo(Libro, Titulo):-
+    tdaLibroEsLibro(Libro),
+    Libro=[_,tituloLibro(Titulo)|_].
+
+tdaLibroGetAutor(Libro,Autor):-
+    tdaLibroEsLibro(Libro),
+    Libro=[_, _, autorLibro(Autor)|_].
+
+tdaLibroGetEstado(Libro,Estado):-
+    tdaLibroEsLibro(Libro),
+    Libro= [_, _, _, estado(Estado)].
+
+
+
+tdaLibroSetEstado(Libro, NuevoEstado, LibroNuevo):-
+    estadoLibros(NuevoEstado),
+    tdaLibroGetID(Libro,ID),
+    tdaLibroGetTitulo(Libro,Titulo),
+    tdaLibroGetAutor(Libro,Autor),
+    LibroNuevo=[idLibro(ID),
+               tituloLibro(Titulo),
+               autorLibro(Autor),
+               estado(NuevoEstado)].
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
