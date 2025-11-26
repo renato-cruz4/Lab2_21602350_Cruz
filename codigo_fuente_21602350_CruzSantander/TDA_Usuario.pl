@@ -1,0 +1,69 @@
+tdaUsuarioCrear(ID, Nombre, U):-
+    U= [idUsuario(ID),
+        nombreUsuario(Nombre),
+       deudaUsuario(0),
+       librosUsuario([]),
+       estado(activo)].
+
+estadoUsuarios(activo).
+estadoUsuarios(suspendido).
+
+tdaUsuarioEsUsuario([idUsuario(ID),
+                     nombreUsuario(Nombre),
+                     deudaUsuario(Deuda),
+                     librosUsuario(LibrosU),
+                     estado(Estado)]):-
+    integer(ID),
+    string(Nombre),
+    integer(Deuda),
+    is_list(LibrosU),
+    estadoUsuarios(Estado).
+
+tdaUsuarioGetID(Usuario,ID):-
+    tdaUsuarioEsUsuario(Usuario),
+    Usuario= [idUsuario(ID)|_].
+
+tdaUsuarioGetNombre(Usuario,Nombre):-
+    tdaUsuarioEsUsuario(Usuario),
+    Usuario= [_, nombreUsuario(Nombre)|_].
+
+tdaUsuarioGetDeuda(Usuario,Deuda):-
+    tdaUsuarioEsUsuario(Usuario),
+    Usuario= [_,_,deudaUsuario(Deuda)|_].
+
+tdaUsuarioGetLibros(Usuario,LibrosU):-
+    tdaUsuarioEsUsuario(Usuario),
+    Usuario= [_,_,_,librosUsuario(LibrosU)|_].
+
+tdaUsuarioGetEstado(Usuario,Estado):-
+    tdaUsuarioEsUsuario(Usuario),
+    Usuario= [_,_,_,_,estado(Estado)|_].
+
+tdaUsuarioSetDeuda(Usuario, NuevaDeuda, UsuarioNuevo):-
+    integer(NuevaDeuda),
+    NuevaDeuda>=0,
+    tdaUsuarioGetID(Usuario,ID),
+    tdaUsuarioGetNombre(Usuario,Nombre),
+    tdaUsuarioGetLibros(Usuario,LibrosU),
+    tdaUsuarioGetEstado(Usuario,Estado),
+
+    UsuarioNuevo=[idUsuario(ID),
+               nombreUsuario(Nombre),
+               deudaUsuario(NuevaDeuda),
+               librosUsuario(LibrosU),
+                  estado(Estado)
+                 ].
+
+tdaUsuarioSetEstado(Usuario, NuevoEstado, UsuarioNuevo):-
+    estadoUsuarios(NuevoEstado),
+    tdaUsuarioGetID(Usuario,ID),
+    tdaUsuarioGetNombre(Usuario,Nombre),
+    tdaUsuarioGetDeuda(Usuario,Deuda),
+    tdaUsuarioGetLibros(Usuario,LibrosU),
+
+    UsuarioNuevo=[idUsuario(ID),
+               nombreUsuario(Nombre),
+               deudaUsuario(Deuda),
+               librosUsuario(LibrosU),
+                  estado(NuevoEstado)
+                 ].
