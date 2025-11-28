@@ -1,0 +1,87 @@
+tdaFechaCrear(D,M,fecha(D,M)).
+tdaFechaEsFecha(Fecha):-
+    integer(D),
+    integer(M),
+    D >= 1, D =< 30,
+    M >= 1, M =< 12.
+
+tdaFechaGetDia(fecha(D,_),D).
+tdaFechaGetMes(fecha(_,M),M).
+
+
+tdaBibliotecaCrear(Libros, Usuarios, Prestamos, MaxLibros, DiasMax, TasaMulta, LimiteDeuda, DiasRetraso, FechaInicial, B) :-
+    B= [libros(Libros),
+        usuarios(Usuarios),
+        prestamos(Prestamos),
+        maxLibros(MaxLibros),
+        diasMax(DiasMax),
+        tasaMulta(TasaMulta),
+        limiteDeuda(LimiteDeuda),
+        diasRetraso(DiasRetraso),
+        fechaBiblioteca(FechaBiblioteca)
+       ].
+
+tdaBibliotecaEsBiblioteca([libros(Libros),
+        usuarios(Usuarios),
+        prestamos(Prestamos),
+        maxLibros(MaxLibros),
+        diasMax(DiasMax),
+        tasaMulta(TasaMulta),
+        limiteDeuda(LimiteDeuda),
+        diasRetraso(DiasRetraso),
+        fechaBiblioteca(FechaBiblioteca)
+       ]):-
+
+       is_list(Usuarios),
+       is_list(Prestamos),
+       integer(MaxLibros),
+       integer(DiasMax),
+       integer(TasaMulta),
+       integer(LimiteDeuda),
+       integer(DiasRetraso),
+       tdaFechaEsFecha(FechaBiblioteca).
+
+tdaUsuarioGetLibros(Biblioteca,Libros):-
+    tdaBibliotecaEsBiblioteca(Biblioteca),
+    Biblioteca= [libros(Libros)|_].
+
+
+tdaUsuarioGetUsuarios(Biblioteca,Usuarios):-
+    tdaBibliotecaEsBiblioteca(Biblioteca),
+    Biblioteca= [_,libros(Usuarios)|_].
+
+    
+tdaUsuarioGetPrestamos(Biblioteca,Prestamos):-
+    tdaBibliotecaEsBiblioteca(Biblioteca),
+    Biblioteca= [_,_,libros(Prestamos)|_].
+
+
+tdaUsuarioGetMaxLibros(Biblioteca,MaxLibros):-
+    tdaBibliotecaEsBiblioteca(Biblioteca),
+    Biblioteca= [_,_,_,libros(MaxLibros)|_].
+
+
+tdaUsuarioGeDiasMax(Biblioteca,DiasMax):-
+    tdaBibliotecaEsBiblioteca(Biblioteca),
+    Biblioteca= [_,_,_,_,libros(DiasMax)|_].
+
+
+tdaUsuarioGetTasaMulta(Biblioteca,TasaMulta):-
+    tdaBibliotecaEsBiblioteca(Biblioteca),
+    Biblioteca= [_,_,_,_,_,libros(TasaMulta)|_].
+
+    
+tdaUsuarioGetLimiteDeuda(Biblioteca,LimiteDeuda):-
+    tdaBibliotecaEsBiblioteca(Biblioteca),
+    Biblioteca= [_,_,_,_,_,_,libros(LimiteDeuda)|_].
+
+
+tdaUsuarioGetDiasRetraso(Biblioteca,DiasRetraso):-
+    tdaBibliotecaEsBiblioteca(Biblioteca),
+    Biblioteca= [_,_,_,_,_,_,_,libros(DiasRetraso)|_].
+
+
+tdaUsuarioGetFecha(Biblioteca,FechaBiblioteca):-
+    tdaBibliotecaEsBiblioteca(Biblioteca),
+    Biblioteca= [_,_,_,_,_,_,_,_,libros(FechaBiblioteca)|_].
+
