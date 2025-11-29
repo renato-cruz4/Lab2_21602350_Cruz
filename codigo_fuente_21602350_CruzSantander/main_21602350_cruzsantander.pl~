@@ -14,8 +14,11 @@ crearUsuario(IDUsuario, Nombre, U) :-
              ].
 
 crearLibro(IDLibro, Titulo, Autor,L ) :-
-    string_lower(Titulo, TituloLower),
-    string_lower(Autor, AutorLower),
+    atom_string(TituloAtom, Titulo),
+    atom_string(AutorAtom, Autor),
+
+    atom_lower(TituloAtom, TituloLower),
+    atom_lower(AutorAtom, AutorLower),
     L = [ id(IDLibro),
                 titulo(TituloLower),
                 autor(AutorLower),

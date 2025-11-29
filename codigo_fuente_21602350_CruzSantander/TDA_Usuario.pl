@@ -3,25 +3,25 @@ tdaUsuarioCrear(ID, Nombre, U):-
         nombreUsuario(Nombre),
        deudaUsuario(0),
        librosUsuario([]),
-       estado(activo)].
+       estadoUsuario(activo)].
 
-estadoUsuarios(activo).
-estadoUsuarios(suspendido).
+estadoUPermitido(activo).
+estadoUPermitido(suspendido).
 
-tdaUsuarioEsUsuario([idUsuario(ID),
+tdaUsuarioEsUsuario([idUsuario(IDUsuario),
                      nombreUsuario(Nombre),
                      deudaUsuario(Deuda),
                      librosUsuario(LibrosU),
-                     estado(Estado)]):-
-    integer(ID),
-    string(Nombre),
+                     estadoUsuario(EstadoUsuario)]):-
+    integer(IDUsuario),
+    (atom(Nombre);  string(Nombre)),
     integer(Deuda),
     is_list(LibrosU),
-    estadoUsuarios(Estado).
+    estadoUPermitido(EstadoUsuario).
 
-tdaUsuarioGetID(Usuario,ID):-
+tdaUsuarioGetID(Usuario,IDUsuario):-
     tdaUsuarioEsUsuario(Usuario),
-    Usuario= [idUsuario(ID)|_].
+    Usuario= [idUsuario(IDUsuario)|_].
 
 tdaUsuarioGetNombre(Usuario,Nombre):-
     tdaUsuarioEsUsuario(Usuario),
@@ -37,7 +37,7 @@ tdaUsuarioGetLibros(Usuario,LibrosU):-
 
 tdaUsuarioGetEstado(Usuario,Estado):-
     tdaUsuarioEsUsuario(Usuario),
-    Usuario= [_,_,_,_,estado(Estado)|_].
+    Usuario= [_,_,_,_,estadoUsuario(Estado)|_].
 
 tdaUsuarioSetDeuda(Usuario, NuevaDeuda, UsuarioNuevo):-
     integer(NuevaDeuda),
@@ -51,11 +51,11 @@ tdaUsuarioSetDeuda(Usuario, NuevaDeuda, UsuarioNuevo):-
                nombreUsuario(Nombre),
                deudaUsuario(NuevaDeuda),
                librosUsuario(LibrosU),
-                  estado(Estado)
+                  estadoUsuario(Estado)
                  ].
 
 tdaUsuarioSetEstado(Usuario, NuevoEstado, UsuarioNuevo):-
-    estadoUsuarios(NuevoEstado),
+    estadoUPermitido(NuevoEstado),
     tdaUsuarioGetID(Usuario,ID),
     tdaUsuarioGetNombre(Usuario,Nombre),
     tdaUsuarioGetDeuda(Usuario,Deuda),
@@ -65,5 +65,5 @@ tdaUsuarioSetEstado(Usuario, NuevoEstado, UsuarioNuevo):-
                nombreUsuario(Nombre),
                deudaUsuario(Deuda),
                librosUsuario(LibrosU),
-                  estado(NuevoEstado)
+               estadoUsuario(NuevoEstado)
                  ].
