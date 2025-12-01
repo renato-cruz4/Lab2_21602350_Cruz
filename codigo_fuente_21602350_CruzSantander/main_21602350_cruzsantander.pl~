@@ -14,11 +14,8 @@ crearUsuario(IDUsuario, Nombre, U) :-
              ].
 
 crearLibro(IDLibro, Titulo, Autor,L ) :-
-    atom_string(TituloAtom, Titulo),
-    atom_string(AutorAtom, Autor),
-
-    atom_lower(TituloAtom, TituloLower),
-    atom_lower(AutorAtom, AutorLower),
+    string_lower(Titulo, TituloLower),
+    string_lower(Autor, AutorLower),
     L = [ id(IDLibro),
                 titulo(TituloLower),
                 autor(AutorLower),
@@ -26,8 +23,8 @@ crearLibro(IDLibro, Titulo, Autor,L ) :-
              ].
 
 
-crearPrestamo(ID, IDUsuario, IDLibro, FechaPrestamo, DiasSolicitados, P) :-
-    P = [id(ID),
+crearPrestamo(IDPrestamo, IDUsuario, IDLibro, FechaPrestamo, DiasSolicitados, P):-
+    P = [idPrestamo(IDPrestamo),
          idUsuario(IDUsuario),
          idLibro(IDLibro),
          fechaPrestamo(FechaPrestamo),
@@ -47,6 +44,14 @@ crearBiblioteca(Libros, Usuarios, Prestamos, MaxLibros, DiasMax, TasaMulta, Limi
        ].
 
 
-
+agregarLibro(BibliotecaIn,Libro1,BibliotecaOut):-
+    tdaLibroGetID(Libro1,IDNuevo),
+    tdaBibliotecaGetLibros(BibliotecaIn, LibrosActuales),
+    (   checkIDLibro(IDNuevo,LibrosActuales)->
+    BibliotecaOut=BibliotecaIn
+    ;
+    tdaBibliotecaGetLibros(BibliotecaIn, LibrosActuales),
+    append(LibrosActuales, [Libro1], LibrosNuevos),
+    tdaBibliotecaSetLibros(BibliotecaIn,LibrosNuevos , BibliotecaOut)).
 
 

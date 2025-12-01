@@ -23,8 +23,8 @@ crearLibro(IDLibro, Titulo, Autor,L ) :-
              ].
 
 
-crearPrestamo(ID, IDUsuario, IDLibro, FechaPrestamo, DiasSolicitados, P) :-
-    P = [id(ID),
+crearPrestamo(IDPrestamo, IDUsuario, IDLibro, FechaPrestamo, DiasSolicitados, P):-
+    P = [idPrestamo(IDPrestamo),
          idUsuario(IDUsuario),
          idLibro(IDLibro),
          fechaPrestamo(FechaPrestamo),
@@ -44,6 +44,20 @@ crearBiblioteca(Libros, Usuarios, Prestamos, MaxLibros, DiasMax, TasaMulta, Limi
        ].
 
 
+agregarLibro(BibliotecaIn, Libro1, BibliotecaOut) :-
 
+    % Extraer ID del nuevo libro
+    tdaLibroGetID(Libro1, IDNuevo),
+
+    % Extraer lista actual de libros
+    tdaBibliotecaGetLibros(BibliotecaIn, LibrosActuales),
+
+    % Revisar si ya existe libro con ese ID
+    ( checkIDLibro(IDNuevo, LibrosActuales) ->
+        BibliotecaOut = BibliotecaIn         % No agrega
+    ;
+        append(LibrosActuales, [Libro1], LibrosNuevos),
+        tdaBibliotecaSetLibros(BibliotecaIn, LibrosNuevos, BibliotecaOut)
+    ).
 
 

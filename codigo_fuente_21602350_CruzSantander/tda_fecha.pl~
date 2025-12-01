@@ -1,32 +1,23 @@
-% Crea una fecha a partir de D y M en formato "DD/MM"
-tdaFechaCrear(D, M, Fecha) :-
-    integer(D), integer(M),
-    D >= 1, D =< 30,
-    M >= 1, M =< 12,
-    format(atom(Fecha), '~|~`0t~d~2+/~|~`0t~d~2+', [D, M]).
 
-% Verifica que un átomo Fecha tenga el formato DD/MM
-tdaFechaEsFecha(Fecha) :-
-    atom(Fecha),
-    split_string(Fecha, "/", "", [SD, SM]),
-    number_string(D, SD),
-    number_string(M, SM),
+
+tdaFechaEsFecha(Fecha):-
+    string(Fecha),
+    split_string(Fecha,"/","",[SD,SM]),
+    number_string(M,SM),
+    number_string(D,SD),
     D >= 1, D =< 30,
     M >= 1, M =< 12.
 
-% Obtiene el día del átomo "DD/MM"
 tdaFechaGetDia(Fecha, D) :-
     tdaFechaEsFecha(Fecha),
     split_string(Fecha, "/", "", [SD, _]),
     number_string(D, SD).
 
-% Obtiene el mes del átomo "DD/MM"
 tdaFechaGetMes(Fecha, M) :-
     tdaFechaEsFecha(Fecha),
     split_string(Fecha, "/", "", [_, SM]),
     number_string(M, SM).
-
-
-
+/*tdaFecha,corregir
+tdaFechaPasarDia(Fecha,NuevaFecha)*/
 
 

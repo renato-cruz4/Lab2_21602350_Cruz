@@ -1,9 +1,9 @@
-tdaLibroCrear(ID, Titulo, Autor,L) :-
-    string_lower(Titulo, TituloBn),
-    string_lower(Autor, AutorBn),
+tdaLibroCrear(ID, TituloI, AutorI,L) :-
+    string_lower(TituloI, Titulo),
+    string_lower(AutorI, Autor),
     L= [idLibro(ID),
-        tituloLibro(TituloBn),
-        autorLibro(AutorBn),
+        tituloLibro(Titulo),
+        autorLibro(Autor),
         estadoLibro(disponible)       ].
 
 
@@ -15,8 +15,8 @@ tdaLibroEsLibro([idLibro(IDLibro),
                 autorLibro(Autor),
                 estadoLibro(Estado)]):-
     integer(IDLibro),
-    atom(Titulo),
-    atom(Autor),
+    string(Titulo),
+    string(Autor),
     estadoLPermitido(Estado).
 
 tdaLibroGetID(Libro, IDLibro):-
@@ -33,7 +33,7 @@ tdaLibroGetAutor(Libro,Autor):-
 
 tdaLibroGetEstado(Libro,Estado):-
     tdaLibroEsLibro(Libro),
-    Libro= [_, _, _, estado(Estado)].
+    Libro= [_, _, _, estadoLibro(Estado)].
 
 
 
@@ -46,7 +46,7 @@ tdaLibroSetEstado(Libro, NuevoEstado, LibroNuevo):-
     LibroNuevo=[idLibro(IDLibro),
                tituloLibro(Titulo),
                autorLibro(Autor),
-               estado(NuevoEstado)].
+               estadoLibro(NuevoEstado)].
 
 
 

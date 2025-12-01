@@ -77,3 +77,32 @@ tdaBibliotecaGetFecha(Biblioteca,FechaBiblioteca):-
     tdaBibliotecaEsBiblioteca(Biblioteca),
     Biblioteca= [_,_,_,_,_,_,_,_,fechaBiblioteca(FechaBiblioteca)|_].
 
+tdaBibliotecaSetLibros([libros(_),
+        usuarios(Usuarios),
+        prestamos(Prestamos),
+        maxLibros(MaxLibros),
+        diasMax(DiasMax),
+        tasaMulta(TasaMulta),
+        limiteDeuda(LimiteDeuda),
+        diasRetraso(DiasRetraso),
+        fechaBiblioteca(FechaBiblioteca)],
+
+        LibrosNuevos,
+
+       [libros(LibrosNuevos),
+        usuarios(Usuarios),
+        prestamos(Prestamos),
+        maxLibros(MaxLibros),
+        diasMax(DiasMax),
+        tasaMulta(TasaMulta),
+        limiteDeuda(LimiteDeuda),
+        diasRetraso(DiasRetraso),
+        fechaBiblioteca(FechaBiblioteca)
+       ]).
+
+
+checkIDLibro(_,[]):- false.
+checkIDLibro(ID,[Libro|Resto]):-
+    tdaLibroGetID(Libro,IDL),
+        (ID=:= IDL -> true ; checkIDLibro(ID,Resto)).
+
