@@ -10,10 +10,11 @@ tdaLibroCrear(ID, TituloI, AutorI,L) :-
 estadoLPermitido(disponible).
 estadoLPermitido(no_disponible).
 
-tdaLibroEsLibro([idLibro(IDLibro),
+tdaLibroEsLibro(Libro):-
+      Libro=   [idLibro(IDLibro),
                 tituloLibro(Titulo),
                 autorLibro(Autor),
-                estadoLibro(Estado)]):-
+                estadoLibro(Estado)],
     integer(IDLibro),
     string(Titulo),
     string(Autor),

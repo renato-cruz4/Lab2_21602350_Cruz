@@ -8,13 +8,15 @@ tdaUsuarioCrear(ID, Nombre, U):-
 estadoUPermitido(activo).
 estadoUPermitido(suspendido).
 
-tdaUsuarioEsUsuario([idUsuario(IDUsuario),
+tdaUsuarioEsUsuario(Usuario):-
+
+    Usuario=        [idUsuario(IDUsuario),
                      nombreUsuario(Nombre),
                      deudaUsuario(Deuda),
                      librosUsuario(LibrosU),
-                     estadoUsuario(EstadoUsuario)]):-
+                     estadoUsuario(EstadoUsuario)],
     integer(IDUsuario),
-    (atom(Nombre);  string(Nombre)),
+    string(Nombre),
     integer(Deuda),
     is_list(LibrosU),
     estadoUPermitido(EstadoUsuario).
@@ -67,3 +69,12 @@ tdaUsuarioSetEstado(Usuario, NuevoEstado, UsuarioNuevo):-
                librosUsuario(LibrosU),
                estadoUsuario(NuevoEstado)
                  ].
+
+
+tdaUsuarioBuscarUsuario(IDEsperado, [Usuario|_].Usuario):-
+    tdaUsuarioGetID(Usuario,IDU),
+    IDEsperado =:= IDU,!.
+
+tdaUsuarioBuscarUsuario(IDBusca,[_|Resto],UsuarioEncontrado):-
+    tdaUsuarioBuscarUsuario(IDBusca,Resto,UsuarioEncontrado).
+

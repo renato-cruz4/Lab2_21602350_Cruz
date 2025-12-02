@@ -6,20 +6,20 @@
 
 
 crearUsuario(IDUsuario, Nombre, U) :-
-    U = [ id(IDUsuario),
-                nombre(Nombre),
-                deuda(0),
-                libros([]),
-                estado(activo)
+    U = [ idUsuario(IDUsuario),
+                nombreUsuario(Nombre),
+                deudaUsuario(0),
+                librosUsuario([]),
+                estadoUsuario(activo)
              ].
 
 crearLibro(IDLibro, Titulo, Autor,L ) :-
     string_lower(Titulo, TituloLower),
     string_lower(Autor, AutorLower),
-    L = [ id(IDLibro),
-                titulo(TituloLower),
-                autor(AutorLower),
-                estado(disponible)
+    L = [ idLibro(IDLibro),
+                tituloLibro(TituloLower),
+                autorLibro(AutorLower),
+                estadoLibro(disponible)
              ].
 
 
@@ -31,7 +31,7 @@ crearPrestamo(IDPrestamo, IDUsuario, IDLibro, FechaPrestamo, DiasSolicitados, P)
          diasSolicitados(DiasSolicitados)
         ].
 
-crearBiblioteca(Libros, Usuarios, Prestamos, MaxLibros, DiasMax, TasaMulta, LimiteDeuda, DiasRetraso, FechaInicial, B) :-
+crearBiblioteca(Libros, Usuarios, Prestamos, MaxLibros, DiasMax, TasaMulta, LimiteDeuda, DiasRetraso, FechaBiblioteca, B) :-
     B= [libros(Libros),
         usuarios(Usuarios),
         prestamos(Prestamos),
@@ -40,7 +40,7 @@ crearBiblioteca(Libros, Usuarios, Prestamos, MaxLibros, DiasMax, TasaMulta, Limi
         tasaMulta(TasaMulta),
         limiteDeuda(LimiteDeuda),
         diasRetraso(DiasRetraso),
-        fechaInicial(FechaInicial)
+        fechaBiblioteca(FechaBiblioteca)
        ].
 
 
@@ -61,3 +61,21 @@ agregarLibro(BibliotecaIn, Libro1, BibliotecaOut) :-
     ).
 
 
+
+registrarUsuario(BibliotecaIn, Usuario, BibliotecaOut):-
+
+    tdaUsuarioGetID(Usuario,IDNuevo),
+    tdaBibliotecaGetUsuarios(BibliotecaIn,UsuariosActuales),
+
+    (checkIDUsuario(IDNuevo,UsuariosActuales)->
+    BibliotecaOut=BibliotecaIn
+    ;
+    append(UsuariosActuales,[Usuario],UsuariosNuevos),
+    tdaBibliotecaSetUsuarios(BibliotecaIn,UsuariosNuevos,BibliotecaOut)
+    ).
+
+obtenerUsuario(BibliotecaIn,IDBusca,UsuarioEncontrado):-
+
+    tdaBibliotecaGetUsuarios(BibliotecaIn,ListaUsuarios),
+
+    tdaUsuarioBuscarUsuario(IDBusca,ListaUsuarios,UsuarioEncontrado).

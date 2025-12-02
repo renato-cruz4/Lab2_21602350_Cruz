@@ -1,4 +1,8 @@
 :- consult('TDA_fecha.pl').
+:- consult('TDA_libro.pl').
+:- consult('TDA_usuario.pl').
+:- consult('TDA_prestamo.pl').
+
 
 
 tdaBibliotecaCrear(Libros, Usuarios, Prestamos, MaxLibros, DiasMax, TasaMulta, LimiteDeuda, DiasRetraso, FechaBiblioteca, B) :-
@@ -99,10 +103,41 @@ tdaBibliotecaSetLibros([libros(_),
         diasRetraso(DiasRetraso),
         fechaBiblioteca(FechaBiblioteca)
        ]).
+tdaBibliotecaSetUsuarios([libros(Libros),
+        usuarios(_),
+        prestamos(Prestamos),
+        maxLibros(MaxLibros),
+        diasMax(DiasMax),
+        tasaMulta(TasaMulta),
+        limiteDeuda(LimiteDeuda),
+        diasRetraso(DiasRetraso),
+        fechaBiblioteca(FechaBiblioteca)],
 
+        UsuariosNuevos,
 
-checkIDLibro(_,[]):- false.
+       [libros(Libros),
+        usuarios(UsuariosNuevos),
+        prestamos(Prestamos),
+        maxLibros(MaxLibros),
+        diasMax(DiasMax),
+        tasaMulta(TasaMulta),
+        limiteDeuda(LimiteDeuda),
+        diasRetraso(DiasRetraso),
+        fechaBiblioteca(FechaBiblioteca)
+       ]).
+
+checkIDLibro(_,[]):-
+    false.
 checkIDLibro(ID,[Libro|Resto]):-
     tdaLibroGetID(Libro,IDL),
         (ID=:= IDL -> true ; checkIDLibro(ID,Resto)).
 
+checkIDUsuario(_,[]):-
+    false.
+checkIDUsuario(ID,[Usuario|Resto]):-
+    tdaUsuarioGetID(Usuario,IDU),
+    (ID =:= IDU->
+    true
+    ;
+    checkIDUsuario(ID,Resto)
+    ).

@@ -15,8 +15,8 @@ tdaLibroEsLibro([idLibro(IDLibro),
                 autorLibro(Autor),
                 estadoLibro(Estado)]):-
     integer(IDLibro),
-    atom(Titulo),
-    atom(Autor),
+    string(Titulo),
+    string(Autor),
     estadoLPermitido(Estado).
 
 tdaLibroGetID(Libro, IDLibro):-
@@ -46,7 +46,7 @@ tdaLibroSetEstado(Libro, NuevoEstado, LibroNuevo):-
     LibroNuevo=[idLibro(IDLibro),
                tituloLibro(Titulo),
                autorLibro(Autor),
-               estado(NuevoEstado)].
+               estadoLibro(NuevoEstado)].
 
 
 
