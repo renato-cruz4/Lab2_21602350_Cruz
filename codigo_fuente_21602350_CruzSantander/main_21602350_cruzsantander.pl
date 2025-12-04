@@ -46,15 +46,12 @@ crearBiblioteca(Libros, Usuarios, Prestamos, MaxLibros, DiasMax, TasaMulta, Limi
 
 agregarLibro(BibliotecaIn, Libro1, BibliotecaOut) :-
 
-    % Extraer ID del nuevo libro
     tdaLibroGetID(Libro1, IDNuevo),
 
-    % Extraer lista actual de libros
     tdaBibliotecaGetLibros(BibliotecaIn, LibrosActuales),
 
-    % Revisar si ya existe libro con ese ID
     ( checkIDLibro(IDNuevo, LibrosActuales) ->
-        BibliotecaOut = BibliotecaIn         % No agrega
+        BibliotecaOut = BibliotecaIn
     ;
         append(LibrosActuales, [Libro1], LibrosNuevos),
         tdaBibliotecaSetLibros(BibliotecaIn, LibrosNuevos, BibliotecaOut)
@@ -82,32 +79,32 @@ obtenerUsuario(BibliotecaIn,IDBusca,UsuarioEncontrado):-
     tdaUsuarioBuscarUsuario(IDBusca,ListaUsuarios,UsuarioEncontrado).
 
 
+
+
+
 buscarLibro(BibliotecaIn, Criterio, Valor, LibroOut) :-
-    % 1. Obtener la lista de libros
+
     tdaBibliotecaGetLibros(BibliotecaIn, ListaLibros),
-    
-    % 2. Llamar al buscador recursivo
-    buscarLibroRec(ListaLibros, Criterio, Valor, LibroOut).
+
+
+    tdaLibroBuscarLibro(ListaLibros, Criterio, Valor, LibroOut).
 
 
 
 
-buscarLibroRec([Libro|_], "id", ValorID, Libro) :-
-    tdaLibroGetID(Libro, ID),
-    ValorID =:= ID, !. % ! Detiene la búsqueda al encontrar el primero
+getFecha(Biblioteca, Fecha) :-
+    tdaBibliotecaGetFecha(Biblioteca, Fecha).
 
 
-buscarLibroRec([Libro|_], "titulo", ValorBusqueda, Libro) :-
-    tdaLibroGetTitulo(Libro, TituloLibro), % El título ya está en minúsculas en el TDA
-    string_lower(ValorBusqueda, ValorLower), % Convertimos la búsqueda a minúsculas
-    sub_string(TituloLibro, _, _, _, ValorLower), !. % Verificamos si Valor está DENTRO de Titulo
 
 
-buscarLibroRec([Libro|_], "autor", ValorBusqueda, Libro) :-
-    tdaLibroGetAutor(Libro, AutorLibro),   % El autor ya está en minúsculas en el TDA
-    string_lower(ValorBusqueda, ValorLower),
-    sub_string(AutorLibro, _, _, _, ValorLower), !.
 
+isLibroDisponible(BibliotecaIn,IDLibro):-
 
-buscarLibroRec([_|Resto], Criterio, Valor, LibroEncontrado) :-
-    buscarLibroRec(Resto, Criterio, Valor, LibroEncontrado).
+    tdaBibliotecaGetLibros(BibliotecaIn,ListaLibros),
+
+    tdaBibliotecaCheckLibro(IDLibro,ListaLibros).
+
+isUsuarioSuspendido(Usuario):-
+    tdaUsuarioGetEstado(Usuario,Estado),
+    Estado== suspendido.

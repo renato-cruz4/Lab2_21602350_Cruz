@@ -46,19 +46,17 @@ crearBiblioteca(Libros, Usuarios, Prestamos, MaxLibros, DiasMax, TasaMulta, Limi
 
 agregarLibro(BibliotecaIn, Libro1, BibliotecaOut) :-
 
-    % Extraer ID del nuevo libro
     tdaLibroGetID(Libro1, IDNuevo),
 
-    % Extraer lista actual de libros
     tdaBibliotecaGetLibros(BibliotecaIn, LibrosActuales),
 
-    % Revisar si ya existe libro con ese ID
     ( checkIDLibro(IDNuevo, LibrosActuales) ->
-        BibliotecaOut = BibliotecaIn         % No agrega
+        BibliotecaOut = BibliotecaIn
     ;
         append(LibrosActuales, [Libro1], LibrosNuevos),
         tdaBibliotecaSetLibros(BibliotecaIn, LibrosNuevos, BibliotecaOut)
     ).
+
 
 
 
@@ -79,3 +77,30 @@ obtenerUsuario(BibliotecaIn,IDBusca,UsuarioEncontrado):-
     tdaBibliotecaGetUsuarios(BibliotecaIn,ListaUsuarios),
 
     tdaUsuarioBuscarUsuario(IDBusca,ListaUsuarios,UsuarioEncontrado).
+
+
+
+
+
+buscarLibro(BibliotecaIn, Criterio, Valor, LibroOut) :-
+
+    tdaBibliotecaGetLibros(BibliotecaIn, ListaLibros),
+
+
+    tdaLibroBuscarLibro(ListaLibros, Criterio, Valor, LibroOut).
+
+
+
+
+getFecha(Biblioteca, Fecha) :-
+    tdaBibliotecaGetFecha(Biblioteca, Fecha).
+
+
+
+
+
+isLibroDisponible(BibliotecaIn,IDLibro):-
+
+    tdaBibliotecaGetLibros(BibliotecaIn,ListaLibros),
+
+    tdaBibliotecaCheckLibro(IDLibro,ListaLibros).

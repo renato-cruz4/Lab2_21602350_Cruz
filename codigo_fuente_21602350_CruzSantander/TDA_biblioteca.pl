@@ -141,3 +141,12 @@ checkIDUsuario(ID,[Usuario|Resto]):-
     ;
     checkIDUsuario(ID,Resto)
     ).
+
+tdaBibliotecaCheckLibro(IDEsperado, [Libro|_]):-
+    tdaLibroGetID(Libro,IDL),
+    IDEsperado =:= IDL,!,
+    tdaLibroGetEstado(Libro,Estado),
+    Estado== disponible.
+
+tdaBibliotecaCheckLibro(IDEsperado, [_|Resto]):-
+    tdaBibliotecaCheckLibro(IDEsperado,Resto).

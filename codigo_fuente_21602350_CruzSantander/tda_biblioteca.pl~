@@ -103,7 +103,28 @@ tdaBibliotecaSetLibros([libros(_),
         diasRetraso(DiasRetraso),
         fechaBiblioteca(FechaBiblioteca)
        ]).
+tdaBibliotecaSetUsuarios([libros(Libros),
+        usuarios(_),
+        prestamos(Prestamos),
+        maxLibros(MaxLibros),
+        diasMax(DiasMax),
+        tasaMulta(TasaMulta),
+        limiteDeuda(LimiteDeuda),
+        diasRetraso(DiasRetraso),
+        fechaBiblioteca(FechaBiblioteca)],
 
+        UsuariosNuevos,
+
+       [libros(Libros),
+        usuarios(UsuariosNuevos),
+        prestamos(Prestamos),
+        maxLibros(MaxLibros),
+        diasMax(DiasMax),
+        tasaMulta(TasaMulta),
+        limiteDeuda(LimiteDeuda),
+        diasRetraso(DiasRetraso),
+        fechaBiblioteca(FechaBiblioteca)
+       ]).
 
 checkIDLibro(_,[]):-
     false.

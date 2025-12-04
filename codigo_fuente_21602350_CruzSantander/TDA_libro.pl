@@ -51,7 +51,25 @@ tdaLibroSetEstado(Libro, NuevoEstado, LibroNuevo):-
 
 
 
+tdaLibroBuscarLibro([Libro|_], "id", ValorID, Libro) :-
+    tdaLibroGetID(Libro, ID),
+    ValorID =:= ID, !.
 
+
+tdaLibroBuscarLibro([Libro|_], "titulo", ValorBusqueda, Libro) :-
+    tdaLibroGetTitulo(Libro, TituloLibro),
+    string_lower(ValorBusqueda, ValorLower),
+    sub_string(TituloLibro, _, _, _, ValorLower), !.
+
+
+tdaLibroBuscarLibro([Libro|_], "autor", ValorBusqueda, Libro) :-
+    tdaLibroGetAutor(Libro, AutorLibro),
+    string_lower(ValorBusqueda, ValorLower),
+    sub_string(AutorLibro, _, _, _, ValorLower), !.
+
+
+tdaLibroBuscarLibro([_|Resto], Criterio, Valor, LibroEncontrado) :-
+    tdaLibroBuscarLibro(Resto, Criterio, Valor, LibroEncontrado).
 
 
 
