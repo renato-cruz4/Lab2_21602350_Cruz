@@ -45,3 +45,10 @@ tdaPrestamoGetDias(Prestamo,DiasSolicitados):-
 
 
 
+tdaPrestamoBuscar([P|_], IdUser, IdLibro, P) :-
+    tdaPrestamoGetIDUsuario(P, U),
+    tdaPrestamoGetIdLibro(P, L),
+    U =:= IdUser,
+    L =:= IdLibro, !.
+tdaPrestamoBuscar([_|Resto], IdUser, IdLibro, P) :-
+    tdaPrestamoBuscar(Resto, IdUser, IdLibro, P).

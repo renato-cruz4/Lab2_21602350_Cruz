@@ -126,6 +126,34 @@ tdaBibliotecaSetUsuarios([libros(Libros),
         fechaBiblioteca(FechaBiblioteca)
        ]).
 
+
+tdaBibliotecaSetPrestamos([libros(Libros),
+                           usuarios(Usuarios),
+                           prestamos(_),
+                           maxLibros(MaxLibros),
+                           diasMax(DiasMax),
+                           tasaMulta(TasaMulta),
+                           limiteDeuda(LimiteDeuda),
+                           diasRetraso(DiasRetraso),
+                           fechaBiblioteca(FechaBiblioteca)],
+
+                          PrestamosNuevos,
+
+                          [libros(Libros),
+                           usuarios(Usuarios),
+                           prestamos(PrestamosNuevos),
+                           maxLibros(MaxLibros),
+                           diasMax(DiasMax),
+                           tasaMulta(TasaMulta),
+                           limiteDeuda(LimiteDeuda),
+                           diasRetraso(DiasRetraso),
+                           fechaBiblioteca(FechaBiblioteca)]).
+
+
+
+
+
+
 checkIDLibro(_,[]):-
     false.
 checkIDLibro(ID,[Libro|Resto]):-
@@ -150,3 +178,14 @@ tdaBibliotecaCheckLibro(IDEsperado, [Libro|_]):-
 
 tdaBibliotecaCheckLibro(IDEsperado, [_|Resto]):-
     tdaBibliotecaCheckLibro(IDEsperado,Resto).
+
+
+
+tdaBibliotecaSusU([], _, []).
+
+tdaBibliotecaSusU([Usuario|Resto], IdTarget, [UsuarioModificado|Resto]) :-
+    tdaUsuarioGetID(Usuario, IdActual),
+    IdActual =:= IdTarget, !,
+    tdaUsuarioSetEstado(Usuario, suspendido, UsuarioModificado).
+tdaBibliotecaSusU([Usuario|Resto], IdTarget, [Usuario|RestoModificado]) :-
+    tdaBibliotecaSusU(Resto, IdTarget, RestoModificado).

@@ -71,10 +71,68 @@ tdaUsuarioSetEstado(Usuario, NuevoEstado, UsuarioNuevo):-
                  ].
 
 
-tdaUsuarioBuscarUsuario(IDEsperado, [Usuario|_].Usuario):-
+tdaUsuarioBuscarUsuario(IDEsperado, [Usuario|_],Usuario):-
     tdaUsuarioGetID(Usuario,IDU),
     IDEsperado =:= IDU,!.
 
 tdaUsuarioBuscarUsuario(IDBusca,[_|Resto],UsuarioEncontrado):-
     tdaUsuarioBuscarUsuario(IDBusca,Resto,UsuarioEncontrado).
 
+
+
+
+tdaUsuarioAgregarLibro(UsuarioIn, IdLibro, UsuarioOut) :-
+    tdaUsuarioGetID(UsuarioIn, ID),
+    tdaUsuarioGetNombre(UsuarioIn, Nom),
+    tdaUsuarioGetDeuda(UsuarioIn, Deuda),
+    tdaUsuarioGetLibros(UsuarioIn, LibrosActuales),
+    tdaUsuarioGetEstado(UsuarioIn, Est),
+
+    append(LibrosActuales, [IdLibro], LibrosNuevos),
+
+    UsuarioOut = [idUsuario(ID), nombreUsuario(Nom), deudaUsuario(Deuda), librosUsuario(LibrosNuevos), estadoUsuario(Est)].
+
+
+tdaUsuarioActualizarL([], _, []).
+tdaUsuarioActualizarL([Usuario|Resto], UsuarioNuevo, [UsuarioNuevo|Resto]) :-
+    tdaUsuarioGetID(Usuario, IDViejo),
+    tdaUsuarioGetID(UsuarioNuevo, IDNuevo),
+    IDViejo =:= IDNuevo, !.
+tdaUsuarioActualizarL([Usuario|Resto], UsuarioNuevo, [Usuario|RestoMod]) :-
+    tdaUsuarioActualizarL(Resto, UsuarioNuevo, RestoMod).
+
+
+
+eliminarElemento([], _, []).
+eliminarElemento([X|Resto], X, Resto) :- !.
+eliminarElemento([Y|Resto], X, [Y|RestoMod]) :-
+    eliminarElemento(Resto, X, RestoMod).
+
+
+
+
+tdaUsuarioEliminarLibro(UsuarioIn, IdLibro, UsuarioOut) :-
+    tdaUsuarioGetLibros(UsuarioIn, LibrosActuales),
+    eliminarElemento(LibrosActuales, IdLibro, LibrosNuevos),
+
+
+    tdaUsuarioGetID(UsuarioIn, ID),
+    tdaUsuarioGetNombre(UsuarioIn, Nom),
+    tdaUsuarioGetDeuda(UsuarioIn, Deuda),
+    tdaUsuarioGetEstado(UsuarioIn, Est),
+
+    UsuarioOut = [idUsuario(ID), nombreUsuario(Nom), deudaUsuario(Deuda), librosUsuario(LibrosNuevos), estadoUsuario(Est)].
+
+
+
+
+tienePrestamoAtrasado([Prestamo|_], IdUsuario, FechaActual, MaxDias) :-
+    tdaPrestamoGetIDUsuario(Prestamo, IdU),
+    IdU =:= IdUsuario,
+    obtenerFechaVencimiento(Prestamo, FechaVenc),
+    calcularDiasRetraso(FechaVenc, FechaActual, DiasRetraso),
+    DiasRetraso > MaxDias.
+
+
+tienePrestamoAtrasado([_|Resto], IdUsuario, FechaActual, MaxDias) :-
+    tienePrestamoAtrasado(Resto, IdUsuario, FechaActual, MaxDias).

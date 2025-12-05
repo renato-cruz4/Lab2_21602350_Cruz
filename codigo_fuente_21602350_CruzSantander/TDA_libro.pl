@@ -78,7 +78,16 @@ tdaLibroBuscarLibro([_|Resto], Criterio, Valor, LibroEncontrado) :-
 
 
 
+tdaLibroActualizarE([], _, _, []).
 
+tdaLibroActualizarE([Libro|Resto], ID, NuevoEstado, [LibroMod|Resto]) :-
+    tdaLibroGetID(Libro, IDL),
+    IDL =:= ID,
+    !,
+    tdaLibroSetEstado(Libro, NuevoEstado, LibroMod).
+
+tdaLibroActualizarE([Libro|Resto], ID, NuevoEstado, [Libro|RestoMod]) :-
+    tdaLibroActualizarE(Resto, ID, NuevoEstado, RestoMod).
 
 
 

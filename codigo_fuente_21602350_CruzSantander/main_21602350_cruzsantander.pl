@@ -135,3 +135,112 @@ calcularMulta(PrestamoIn, FechaActual, Tasa, Multa) :-
     Multa is DiasRetraso * Tasa.
 
 
+
+tomarPrestamo(BibIn, IdUsuario, IdLibro, Dias, FechaActual, BibOut) :-
+
+    tdaBibliotecaGetMaxLibros(BibIn, MaxLibros),
+    tdaBibliotecaGetDiasMax(BibIn, DiasMax),
+    tdaBibliotecaGetLimiteDeuda(BibIn, LimiteDeuda),
+
+    Dias =< DiasMax,
+
+    isLibroDisponible(BibIn, IdLibro),
+
+    obtenerUsuario(BibIn, IdUsuario, Usuario),
+
+    \+ isUsuarioSuspendido(Usuario),
+
+    obtenerDeuda(Usuario, Deuda),
+    Deuda =< LimiteDeuda,
+
+    tdaUsuarioGetLibros(Usuario, LibrosUser),
+    length(LibrosUser, CantidadActual),
+    CantidadActual < MaxLibros,
+
+
+
+    tdaBibliotecaGetPrestamos(BibIn, Prestamos),
+    length(Prestamos, CantidadP),
+    IDNuevoPrestamo is CantidadP + 1,
+    crearPrestamo(IDNuevoPrestamo, IdUsuario, IdLibro, FechaActual, Dias, NuevoPrestamo),
+    append(Prestamos, [NuevoPrestamo], PrestamosActualizados),
+
+    tdaBibliotecaGetLibros(BibIn, Libros),
+    tdaLibroActualizarE(Libros, IdLibro, no_disponible, LibrosActualizados),
+
+    tdaUsuarioAgregarLibro(Usuario, IdLibro, UsuarioActualizado),
+
+    tdaBibliotecaGetUsuarios(BibIn, Usuarios),
+    tdaUsuarioActualizarL(Usuarios, UsuarioActualizado, UsuariosActualizados),
+
+
+    tdaBibliotecaSetLibros(BibIn, LibrosActualizados, B_Tmp1),
+    tdaBibliotecaSetUsuarios(B_Tmp1, UsuariosActualizados, B_Tmp2),
+    tdaBibliotecaSetPrestamos(B_Tmp2, PrestamosActualizados, BibOut).
+
+
+
+
+devolverLibro(BibIn, IdUser, IdLibro, FechaActual, BibOut) :-
+    tdaBibliotecaGetPrestamos(BibIn, Prestamos),
+    tdaBibliotecaGetUsuarios(BibIn, Usuarios),
+    tdaBibliotecaGetLibros(BibIn, Libros),
+    tdaBibliotecaGetTasaMulta(BibIn, Tasa),
+    tdaBibliotecaGetLimiteDeuda(BibIn, LimiteDeuda),
+
+    tdaPrestamoBuscar(Prestamos, IdUser, IdLibro, Prestamo),
+
+    calcularMulta(Prestamo, FechaActual, Tasa, Multa),
+
+    obtenerUsuario(BibIn, IdUser, Usuario),
+    obtenerDeuda(Usuario, DeudaActual),
+    NuevaDeuda is DeudaActual + Multa,
+
+
+    (NuevaDeuda > LimiteDeuda ->
+        NuevoEstado = suspendido
+    ;
+        tdaUsuarioGetEstado(Usuario, NuevoEstado)
+    ),
+
+    tdaUsuarioSetDeuda(Usuario, NuevaDeuda, U_Tmp1),
+    tdaUsuarioSetEstado(U_Tmp1, NuevoEstado, U_Tmp2),
+    tdaUsuarioEliminarLibro(U_Tmp2, IdLibro, UsuarioActualizado),
+
+    tdaUsuarioActualizarL(Usuarios, UsuarioActualizado, UsuariosActualizados),
+
+    tdaLibroActualizarE(Libros, IdLibro, disponible, LibrosActualizados),
+
+    eliminarElemento(Prestamos, Prestamo, PrestamosActualizados),
+
+
+    tdaBibliotecaSetLibros(BibIn, LibrosActualizados, B_Tmp1),
+    tdaBibliotecaSetUsuarios(B_Tmp1, UsuariosActualizados, B_Tmp2),
+    tdaBibliotecaSetPrestamos(B_Tmp2, PrestamosActualizados, BibOut).
+
+
+
+debeSuspenderse(Biblioteca, IdUsuario, FechaActual) :-
+
+    tdaBibliotecaGetLimiteDeuda(Biblioteca, LimiteDeuda),
+    tdaBibliotecaGetDiasRetraso(Biblioteca, MaxDiasRetrasoPermitidos),
+
+
+    obtenerUsuario(Biblioteca, IdUsuario, Usuario),
+
+    (
+        obtenerDeuda(Usuario, Deuda),
+        Deuda > LimiteDeuda
+    ;
+        tdaBibliotecaGetPrestamos(Biblioteca, Prestamos),
+        tienePrestamoAtrasado(Prestamos, IdUsuario, FechaActual, MaxDiasRetrasoPermitidos)
+    ).
+
+
+suspenderUsuario(BibliotecaIn, IdUsuario, BibliotecaOut) :-
+
+    tdaBibliotecaGetUsuarios(BibliotecaIn, UsuariosActuales),
+
+    tdaBibliotecaSusU(UsuariosActuales, IdUsuario, UsuariosNuevos),
+
+    tdaBibliotecaSetUsuarios(BibliotecaIn, UsuariosNuevos, BibliotecaOut).

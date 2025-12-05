@@ -13,6 +13,7 @@ crearUsuario(IDUsuario, Nombre, U) :-
                 estadoUsuario(activo)
              ].
 
+
 crearLibro(IDLibro, Titulo, Autor,L ) :-
     string_lower(Titulo, TituloLower),
     string_lower(Autor, AutorLower),
@@ -30,6 +31,7 @@ crearPrestamo(IDPrestamo, IDUsuario, IDLibro, FechaPrestamo, DiasSolicitados, P)
          fechaPrestamo(FechaPrestamo),
          diasSolicitados(DiasSolicitados)
         ].
+
 
 crearBiblioteca(Libros, Usuarios, Prestamos, MaxLibros, DiasMax, TasaMulta, LimiteDeuda, DiasRetraso, FechaBiblioteca, B) :-
     B= [libros(Libros),
@@ -58,8 +60,6 @@ agregarLibro(BibliotecaIn, Libro1, BibliotecaOut) :-
     ).
 
 
-
-
 registrarUsuario(BibliotecaIn, Usuario, BibliotecaOut):-
 
     tdaUsuarioGetID(Usuario,IDNuevo),
@@ -72,6 +72,7 @@ registrarUsuario(BibliotecaIn, Usuario, BibliotecaOut):-
     tdaBibliotecaSetUsuarios(BibliotecaIn,UsuariosNuevos,BibliotecaOut)
     ).
 
+
 obtenerUsuario(BibliotecaIn,IDBusca,UsuarioEncontrado):-
 
     tdaBibliotecaGetUsuarios(BibliotecaIn,ListaUsuarios),
@@ -79,35 +80,27 @@ obtenerUsuario(BibliotecaIn,IDBusca,UsuarioEncontrado):-
     tdaUsuarioBuscarUsuario(IDBusca,ListaUsuarios,UsuarioEncontrado).
 
 
-
-
-
 buscarLibro(BibliotecaIn, Criterio, Valor, LibroOut) :-
 
     tdaBibliotecaGetLibros(BibliotecaIn, ListaLibros),
 
-
     tdaLibroBuscarLibro(ListaLibros, Criterio, Valor, LibroOut).
-
-
 
 
 getFecha(Biblioteca, Fecha) :-
     tdaBibliotecaGetFecha(Biblioteca, Fecha).
 
 
-
-
-
 isLibroDisponible(BibliotecaIn,IDLibro):-
 
     tdaBibliotecaGetLibros(BibliotecaIn,ListaLibros),
-
     tdaBibliotecaCheckLibro(IDLibro,ListaLibros).
+
 
 isUsuarioSuspendido(Usuario):-
     tdaUsuarioGetEstado(Usuario,Estado),
     Estado== suspendido.
+
 
 obtenerDeuda(Usuario, Deuda):-
     tdaUsuarioGetDeuda(Usuario, Deuda).
@@ -117,6 +110,7 @@ obtenerFechaVencimiento(Prestamo, FechaVencimiento) :-
     tdaPrestamoGetFecha(Prestamo, FechaInicio),
     tdaPrestamoGetDias(Prestamo, DiasSolicitados),
     sumarDias(FechaInicio, DiasSolicitados, FechaVencimiento).
+
 
 calcularDiasRetraso(FechaVenc, FechaActual, DiasRetraso) :-
 
@@ -130,3 +124,134 @@ calcularDiasRetraso(FechaVenc, FechaActual, DiasRetraso) :-
     ;
         DiasRetraso is 0
     ).
+
+
+calcularMulta(PrestamoIn, FechaActual, Tasa, Multa) :-
+
+    obtenerFechaVencimiento(PrestamoIn, FechaVencimiento),
+
+    calcularDiasRetraso(FechaVencimiento, FechaActual, DiasRetraso),
+
+    Multa is DiasRetraso * Tasa.
+
+
+
+tomarPrestamo(BibIn, IdUsuario, IdLibro, Dias, FechaActual, BibOut) :-
+
+    tdaBibliotecaGetMaxLibros(BibIn, MaxLibros),
+    tdaBibliotecaGetDiasMax(BibIn, DiasMax),
+    tdaBibliotecaGetLimiteDeuda(BibIn, LimiteDeuda),
+
+    Dias =< DiasMax,
+
+    isLibroDisponible(BibIn, IdLibro),
+
+    obtenerUsuario(BibIn, IdUsuario, Usuario),
+
+    \+ isUsuarioSuspendido(Usuario),
+
+    obtenerDeuda(Usuario, Deuda),
+    Deuda =< LimiteDeuda,
+
+    tdaUsuarioGetLibros(Usuario, LibrosUser),
+    length(LibrosUser, CantidadActual),
+    CantidadActual < MaxLibros,
+
+
+
+    tdaBibliotecaGetPrestamos(BibIn, Prestamos),
+    length(Prestamos, CantidadP),
+    IDNuevoPrestamo is CantidadP + 1,
+    crearPrestamo(IDNuevoPrestamo, IdUsuario, IdLibro, FechaActual, Dias, NuevoPrestamo),
+    append(Prestamos, [NuevoPrestamo], PrestamosActualizados),
+
+    % B. Actualizar Libro (Estado -> no_disponible)
+    tdaBibliotecaGetLibros(BibIn, Libros),
+    tdaLibroActualizarE(Libros, IdLibro, no_disponible, LibrosActualizados),
+
+    % C. Actualizar Usuario (Agregar ID del libro a su lista)
+    tdaUsuarioAgregarLibro(Usuario, IdLibro, UsuarioActualizado),
+
+    % D. Actualizar la lista de Usuarios en la biblioteca
+    tdaBibliotecaGetUsuarios(BibIn, Usuarios),
+    tdaUsuarioActualizarL(Usuarios, UsuarioActualizado, UsuariosActualizados),
+
+    % E. Guardar todo en la Biblioteca de Salida (Setters)
+    tdaBibliotecaSetLibros(BibIn, LibrosActualizados, B_Tmp1),
+    tdaBibliotecaSetUsuarios(B_Tmp1, UsuariosActualizados, B_Tmp2),
+    tdaBibliotecaSetPrestamos(B_Tmp2, PrestamosActualizados, BibOut).
+
+
+
+
+devolverLibro(BibIn, IdUser, IdLibro, FechaActual, BibOut) :-
+    % 1. Obtener datos necesarios de la biblioteca
+    tdaBibliotecaGetPrestamos(BibIn, Prestamos),
+    tdaBibliotecaGetUsuarios(BibIn, Usuarios),
+    tdaBibliotecaGetLibros(BibIn, Libros),
+    tdaBibliotecaGetTasaMulta(BibIn, Tasa),
+    tdaBibliotecaGetLimiteDeuda(BibIn, LimiteDeuda),
+
+    % 2. Buscar el préstamo activo
+    tdaPrestamoBuscar(Prestamos, IdUser, IdLibro, Prestamo),
+
+    % 3. Calcular Multa
+    calcularMulta(Prestamo, FechaActual, Tasa, Multa),
+
+    % 4. Actualizar Usuario: Deuda y Estado
+    obtenerUsuario(BibIn, IdUser, Usuario),
+    obtenerDeuda(Usuario, DeudaActual),
+    NuevaDeuda is DeudaActual + Multa,
+
+    % Determinar si se suspende (Si NuevaDeuda > Limite -> suspendido, sino mantiene el actual)
+    (NuevaDeuda > LimiteDeuda ->
+        NuevoEstado = suspendido
+    ;
+        tdaUsuarioGetEstado(Usuario, NuevoEstado)
+    ),
+
+    % Aplicar cambios al Usuario (Set Deuda, Set Estado, Eliminar Libro)
+    tdaUsuarioSetDeuda(Usuario, NuevaDeuda, U_Tmp1),
+    tdaUsuarioSetEstado(U_Tmp1, NuevoEstado, U_Tmp2),
+    tdaUsuarioEliminarLibro(U_Tmp2, IdLibro, UsuarioActualizado),
+
+    % 5. Actualizar Usuario en la lista general
+    tdaUsuarioActualizarL(Usuarios, UsuarioActualizado, UsuariosActualizados),
+
+    % 6. Actualizar Libro (Estado -> disponible)
+    tdaLibroActualizarE(Libros, IdLibro, disponible, LibrosActualizados),
+
+    % 7. Eliminar el Préstamo de la lista
+    eliminarElemento(Prestamos, Prestamo, PrestamosActualizados),
+
+    % 8. Guardar todo en la Biblioteca de Salida
+    tdaBibliotecaSetLibros(BibIn, LibrosActualizados, B_Tmp1),
+    tdaBibliotecaSetUsuarios(B_Tmp1, UsuariosActualizados, B_Tmp2),
+    tdaBibliotecaSetPrestamos(B_Tmp2, PrestamosActualizados, BibOut).
+
+
+
+debeSuspenderse(Biblioteca, IdUsuario, FechaActual) :-
+
+    tdaBibliotecaGetLimiteDeuda(Biblioteca, LimiteDeuda),
+    tdaBibliotecaGetDiasRetraso(Biblioteca, MaxDiasRetrasoPermitidos),
+
+
+    obtenerUsuario(Biblioteca, IdUsuario, Usuario),
+
+    (
+        obtenerDeuda(Usuario, Deuda),
+        Deuda > LimiteDeuda
+    ;
+        tdaBibliotecaGetPrestamos(Biblioteca, Prestamos),
+        tienePrestamoAtrasado(Prestamos, IdUsuario, FechaActual, MaxDiasRetrasoPermitidos)
+    ).
+
+
+suspenderUsuario(BibliotecaIn, IdUsuario, BibliotecaOut) :-
+
+    tdaBibliotecaGetUsuarios(BibliotecaIn, UsuariosActuales),
+
+    tdaBibliotecaSusU(UsuariosActuales, IdUsuario, UsuariosNuevos),
+
+    tdaBibliotecaSetUsuarios(BibliotecaIn, UsuariosNuevos, BibliotecaOut).
