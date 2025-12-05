@@ -53,3 +53,16 @@ tdaFechaPasar(Fecha,NuevaFecha):-
 
 
 
+sumarDias(Fecha, 0, Fecha) :- !.
+
+sumarDias(FechaIn, DiasRestantes, FechaOut) :-
+    DiasRestantes > 0,
+    tdaFechaPasar(FechaIn, FechaSiguiente),
+    NuevosDias is DiasRestantes - 1,
+    sumarDias(FechaSiguiente, NuevosDias, FechaOut).
+
+
+diasTotales(Fecha, TotalDias) :-
+    tdaFechaGetDia(Fecha, Dia),
+    tdaFechaGetMes(Fecha, Mes),
+    TotalDias is ((Mes - 1) * 30) + Dia.

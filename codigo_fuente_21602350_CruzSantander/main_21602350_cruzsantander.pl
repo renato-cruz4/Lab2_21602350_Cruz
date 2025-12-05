@@ -13,6 +13,7 @@ crearUsuario(IDUsuario, Nombre, U) :-
                 estadoUsuario(activo)
              ].
 
+
 crearLibro(IDLibro, Titulo, Autor,L ) :-
     string_lower(Titulo, TituloLower),
     string_lower(Autor, AutorLower),
@@ -30,6 +31,7 @@ crearPrestamo(IDPrestamo, IDUsuario, IDLibro, FechaPrestamo, DiasSolicitados, P)
          fechaPrestamo(FechaPrestamo),
          diasSolicitados(DiasSolicitados)
         ].
+
 
 crearBiblioteca(Libros, Usuarios, Prestamos, MaxLibros, DiasMax, TasaMulta, LimiteDeuda, DiasRetraso, FechaBiblioteca, B) :-
     B= [libros(Libros),
@@ -58,8 +60,6 @@ agregarLibro(BibliotecaIn, Libro1, BibliotecaOut) :-
     ).
 
 
-
-
 registrarUsuario(BibliotecaIn, Usuario, BibliotecaOut):-
 
     tdaUsuarioGetID(Usuario,IDNuevo),
@@ -72,6 +72,7 @@ registrarUsuario(BibliotecaIn, Usuario, BibliotecaOut):-
     tdaBibliotecaSetUsuarios(BibliotecaIn,UsuariosNuevos,BibliotecaOut)
     ).
 
+
 obtenerUsuario(BibliotecaIn,IDBusca,UsuarioEncontrado):-
 
     tdaBibliotecaGetUsuarios(BibliotecaIn,ListaUsuarios),
@@ -79,32 +80,58 @@ obtenerUsuario(BibliotecaIn,IDBusca,UsuarioEncontrado):-
     tdaUsuarioBuscarUsuario(IDBusca,ListaUsuarios,UsuarioEncontrado).
 
 
-
-
-
 buscarLibro(BibliotecaIn, Criterio, Valor, LibroOut) :-
 
     tdaBibliotecaGetLibros(BibliotecaIn, ListaLibros),
 
-
     tdaLibroBuscarLibro(ListaLibros, Criterio, Valor, LibroOut).
-
-
 
 
 getFecha(Biblioteca, Fecha) :-
     tdaBibliotecaGetFecha(Biblioteca, Fecha).
 
 
-
-
-
 isLibroDisponible(BibliotecaIn,IDLibro):-
 
     tdaBibliotecaGetLibros(BibliotecaIn,ListaLibros),
-
     tdaBibliotecaCheckLibro(IDLibro,ListaLibros).
+
 
 isUsuarioSuspendido(Usuario):-
     tdaUsuarioGetEstado(Usuario,Estado),
     Estado== suspendido.
+
+
+obtenerDeuda(Usuario, Deuda):-
+    tdaUsuarioGetDeuda(Usuario, Deuda).
+
+
+obtenerFechaVencimiento(Prestamo, FechaVencimiento) :-
+    tdaPrestamoGetFecha(Prestamo, FechaInicio),
+    tdaPrestamoGetDias(Prestamo, DiasSolicitados),
+    sumarDias(FechaInicio, DiasSolicitados, FechaVencimiento).
+
+
+calcularDiasRetraso(FechaVenc, FechaActual, DiasRetraso) :-
+
+    diasTotales(FechaVenc, TotalVenc),
+    diasTotales(FechaActual, TotalActual),
+
+    Diferencia is TotalActual - TotalVenc,
+
+    ( Diferencia > 0 ->
+        DiasRetraso is Diferencia
+    ;
+        DiasRetraso is 0
+    ).
+
+
+calcularMulta(PrestamoIn, FechaActual, Tasa, Multa) :-
+
+    obtenerFechaVencimiento(PrestamoIn, FechaVencimiento),
+
+    calcularDiasRetraso(FechaVencimiento, FechaActual, DiasRetraso),
+
+    Multa is DiasRetraso * Tasa.
+
+

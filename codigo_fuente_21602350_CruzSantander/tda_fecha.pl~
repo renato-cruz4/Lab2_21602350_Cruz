@@ -1,4 +1,4 @@
-check(S, S2) :-
+check2D(S, S2) :-
     (   string_length(S, 1)
     ->  string_concat("0", S, S2)
     ;   S2 = S
@@ -14,8 +14,8 @@ tdaFechaCrear(D, M, Fecha) :-
     number_string(M, SM0),
 
     % Asegurar que tengan dos dígitos
-    check(SD0, SD),
-    check(SM0, SM),
+    check2D(SD0, SD),
+    check2D(SM0, SM),
 
     % Construir DD/MM
     string_concat(SD, "/", T),
@@ -53,3 +53,10 @@ tdaFechaPasar(Fecha,NuevaFecha):-
 
 
 
+sumarDias(Fecha, 0, Fecha) :- !.
+
+sumarDias(FechaIn, DiasRestantes, FechaOut) :-
+    DiasRestantes > 0,
+    tdaFechaPasar(FechaIn, FechaSiguiente),
+    NuevosDias is DiasRestantes - 1,
+    sumarDias(FechaSiguiente, NuevosDias, FechaOut).

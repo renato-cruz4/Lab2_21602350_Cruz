@@ -37,7 +37,7 @@ tdaPrestamoGetIdLibro(Prestamo,IDLibro):-
 
 tdaPrestamoGetFecha(Prestamo,FechaPrestamo):-
     tdaPrestamoEsPrestamo(Prestamo),
-    Prestamo= [_, _, _, fechaPrestamo(FechaPrestamo)].
+    Prestamo= [_, _, _, fechaPrestamo(FechaPrestamo)|_].
 
 tdaPrestamoGetDias(Prestamo,DiasSolicitados):-
     tdaPrestamoEsPrestamo(Prestamo),

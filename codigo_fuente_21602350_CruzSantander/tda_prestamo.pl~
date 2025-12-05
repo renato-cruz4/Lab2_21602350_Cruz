@@ -10,12 +10,13 @@ tdaPrestamoCrear(IDPrestamo, IDUsuario, IDLibro, FechaPrestamo, DiasSolicitados,
         ].
 
 
-tdaPrestamoEsPrestamo([idPrestamo(IDPrestamo),
+tdaPrestamoEsPrestamo(Prestamo):-
+    Prestamo=[idPrestamo(IDPrestamo),
          idUsuario(IDUsuario),
          idLibro(IDLibro),
          fechaPrestamo(FechaPrestamo),
          diasSolicitados(DiasSolicitados)
-        ]):-
+        ],
     integer(IDPrestamo),
     integer(IDUsuario),
     integer(IDLibro),
