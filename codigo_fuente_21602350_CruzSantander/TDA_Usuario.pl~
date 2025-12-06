@@ -115,10 +115,24 @@ tdaUsuarioEliminarLibro(UsuarioIn, IdLibro, UsuarioOut) :-
     tdaUsuarioGetLibros(UsuarioIn, LibrosActuales),
     eliminarElemento(LibrosActuales, IdLibro, LibrosNuevos),
 
-    % Reconstruimos el usuario (manteniendo los otros datos iguales)
+
     tdaUsuarioGetID(UsuarioIn, ID),
     tdaUsuarioGetNombre(UsuarioIn, Nom),
     tdaUsuarioGetDeuda(UsuarioIn, Deuda),
     tdaUsuarioGetEstado(UsuarioIn, Est),
 
     UsuarioOut = [idUsuario(ID), nombreUsuario(Nom), deudaUsuario(Deuda), librosUsuario(LibrosNuevos), estadoUsuario(Est)].
+
+
+
+
+tienePrestamoAtrasado([Prestamo|_], IdUsuario, FechaActual, MaxDias) :-
+    tdaPrestamoGetIDUsuario(Prestamo, IdU),
+    IdU =:= IdUsuario,
+    obtenerFechaVencimiento(Prestamo, FechaVenc),
+    calcularDiasRetraso(FechaVenc, FechaActual, DiasRetraso),
+    DiasRetraso > MaxDias.
+
+
+tienePrestamoAtrasado([_|Resto], IdUsuario, FechaActual, MaxDias) :-
+    tienePrestamoAtrasado(Resto, IdUsuario, FechaActual, MaxDias).

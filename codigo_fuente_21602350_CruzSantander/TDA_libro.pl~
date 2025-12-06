@@ -87,7 +87,7 @@ tdaLibroActualizarE([Libro|Resto], ID, NuevoEstado, [LibroMod|Resto]) :-
     tdaLibroSetEstado(Libro, NuevoEstado, LibroMod).
 
 tdaLibroActualizarE([Libro|Resto], ID, NuevoEstado, [Libro|RestoMod]) :-
-    actualizarEstadoLibroEnLista(Resto, ID, NuevoEstado, RestoMod).
+    tdaLibroActualizarE(Resto, ID, NuevoEstado, RestoMod).
 
 
 

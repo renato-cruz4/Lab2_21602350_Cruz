@@ -5,6 +5,13 @@
 :- consult('TDA_biblioteca.pl').
 
 
+
+/*RF02>01
+ crearUsuario
+ Descripción: Crea un usuario con deuda inicial 0 y estado activo (no suspendido).
+ Dom: id (int) X nombre (string) X usuario (Usuario)
+ Rec: usuario(U)
+*/
 crearUsuario(IDUsuario, Nombre, U) :-
     U = [ idUsuario(IDUsuario),
                 nombreUsuario(Nombre),
@@ -14,6 +21,13 @@ crearUsuario(IDUsuario, Nombre, U) :-
              ].
 
 
+
+/* RF03<01
+ crearLibro
+ Descripción: Crea un libro con id, título y autor. Título y autor se convierten en minúsculas al crear.
+ Dom: id (int) X titulo (string) X autor (string) X libro (Libro)
+ Rec: libro(L)
+*/
 crearLibro(IDLibro, Titulo, Autor,L ) :-
     string_lower(Titulo, TituloLower),
     string_lower(Autor, AutorLower),
@@ -24,15 +38,35 @@ crearLibro(IDLibro, Titulo, Autor,L ) :-
              ].
 
 
+
+/* RF04>01
+crearPrestamo
+ Descripción: Crea un préstamo.
+Dom: id (int) X idUsuario (int) X idLibro (int) X fechaPrestamo
+(string) X diasSolicitados (int) X prestamo (Prestamo)
+Rec: prestamo(P)
+*/
 crearPrestamo(IDPrestamo, IDUsuario, IDLibro, FechaPrestamo, DiasSolicitados, P):-
     P = [idPrestamo(IDPrestamo),
          idUsuario(IDUsuario),
          idLibro(IDLibro),
          fechaPrestamo(FechaPrestamo),
-         diasSolicitados(DiasSolicitados)
+         diasSolicitados(DiasSolicitados),
+         estadoPrestamo(activo)
         ].
 
 
+
+/* RF05>02,03,04
+crearBiblioteca
+ Descripción: Crea la biblioteca con parámetros de configuración dados
+ Dom: libros (Lista Libro) X usuarios (Lista Usuario) X prestamos (Lista
+ Prestamo) X max-libros-usuario (int) X dias-max-prestamo (int) X
+ tasa-multa-diaria (int) X limite-deuda-max (int) X dias-max-retraso
+ (int) X fecha-inicial (string) X biblioteca (Biblioteca)
+ Rec:
+ biblioteca(B)
+*/
 crearBiblioteca(Libros, Usuarios, Prestamos, MaxLibros, DiasMax, TasaMulta, LimiteDeuda, DiasRetraso, FechaBiblioteca, B) :-
     B= [libros(Libros),
         usuarios(Usuarios),
@@ -46,6 +80,15 @@ crearBiblioteca(Libros, Usuarios, Prestamos, MaxLibros, DiasMax, TasaMulta, Limi
        ].
 
 
+
+
+
+/* RF06>05
+agregarLibro
+ Descripción: Agrega un libro a la biblioteca. **Si el ID ya existe, no se agrega y retorna la biblioteca sin cambios**. Se permiten libros con mismo título/autor pero diferente ID. **La posición donde se agrega el libro queda a criterio del estudiante**.
+ Dom: biblioteca (Biblioteca) X libro (Libro) X biblioteca (Biblioteca)
+ Rec: BibliotecaOut(B)
+*/
 agregarLibro(BibliotecaIn, Libro1, BibliotecaOut) :-
 
     tdaLibroGetID(Libro1, IDNuevo),
@@ -60,6 +103,14 @@ agregarLibro(BibliotecaIn, Libro1, BibliotecaOut) :-
     ).
 
 
+
+/* RF07>05
+registrarUsuario
+ Descripción: Registra usuario en el sistema.
+Dom: biblioteca
+ (Biblioteca) X usuario (Usuario) X biblioteca (Biblioteca)
+ Rec:bibliotecaOut(B)
+*/
 registrarUsuario(BibliotecaIn, Usuario, BibliotecaOut):-
 
     tdaUsuarioGetID(Usuario,IDNuevo),
@@ -73,6 +124,14 @@ registrarUsuario(BibliotecaIn, Usuario, BibliotecaOut):-
     ).
 
 
+
+
+/* RF08>07
+obtenerUsuario
+ Descripción: Busca usuario por ID. **Retorna false si no encuentra el usuario**.
+ Dom: biblioteca (Biblioteca) X id (int) X usuario (Usuario)
+ Rec: usuario(U)
+*/
 obtenerUsuario(BibliotecaIn,IDBusca,UsuarioEncontrado):-
 
     tdaBibliotecaGetUsuarios(BibliotecaIn,ListaUsuarios),
@@ -80,6 +139,13 @@ obtenerUsuario(BibliotecaIn,IDBusca,UsuarioEncontrado):-
     tdaUsuarioBuscarUsuario(IDBusca,ListaUsuarios,UsuarioEncontrado).
 
 
+
+/* RF09 >08
+buscarLibro
+ Descripción: Busca un libro por "id", "titulo" o "autor".
+ Dom: biblioteca (Biblioteca) X criterio (string) X valor (string/int) X libro (Libro)
+ Rec: LibroOut(L)
+*/
 buscarLibro(BibliotecaIn, Criterio, Valor, LibroOut) :-
 
     tdaBibliotecaGetLibros(BibliotecaIn, ListaLibros),
@@ -87,32 +153,92 @@ buscarLibro(BibliotecaIn, Criterio, Valor, LibroOut) :-
     tdaLibroBuscarLibro(ListaLibros, Criterio, Valor, LibroOut).
 
 
+
+/* RF10 >09
+getLibroId
+ Descripción: obtiene el ID de un libro.
+ Dom: libro(L) X ID(int)
+ Rec: id(int)
+*/
+
+getLibroId(Libro,ID):-
+    tdaLibroGetID(Libro,ID).
+
+
+
+
+/* RF11>10
+getFecha
+ Descripción: Obtiene la fecha actual del sistema desde la biblioteca.
+ Dom: biblioteca (Biblioteca) X fecha (String)
+ Rec: Fecha(F)
+*/
 getFecha(Biblioteca, Fecha) :-
     tdaBibliotecaGetFecha(Biblioteca, Fecha).
 
 
+
+/* RF12>11
+isLibroDisponible
+ Descripción: Verifica si un libro está disponible (no prestado)
+ Dom: biblioteca (Biblioteca) X idLibro (int) Rec: boolean
+*/
 isLibroDisponible(BibliotecaIn,IDLibro):-
 
     tdaBibliotecaGetLibros(BibliotecaIn,ListaLibros),
     tdaBibliotecaCheckLibro(IDLibro,ListaLibros).
 
 
+
+/* RF13> 12
+isUsuarioSuspendido
+ Descripción: Verifica estado de suspensión del usuario.
+ Dom: usuario (Usuario)
+ Rec: boolean
+*/
 isUsuarioSuspendido(Usuario):-
     tdaUsuarioGetEstado(Usuario,Estado),
     Estado== suspendido.
 
 
+
+/* RF14>13
+obtenerDeuda
+ Descripción: Retorna la deuda acumulada del usuario.
+ Dom: usuario (Usuario) X deuda (number)
+ Rec: Deuda(D)
+*/
 obtenerDeuda(Usuario, Deuda):-
     tdaUsuarioGetDeuda(Usuario, Deuda).
 
 
+
+/* RF15>14
+obtenerFechaVencimiento
+ Descripción: Calcula fecha de vencimiento sumando días solicitados a
+ fecha de préstamo.
+Dom: prestamo (Prestamo) X fecha (String)
+ Rec:FechaVencimiento(F)
+*/
+%auxiliar en tdafecha
 obtenerFechaVencimiento(Prestamo, FechaVencimiento) :-
     tdaPrestamoGetFecha(Prestamo, FechaInicio),
     tdaPrestamoGetDias(Prestamo, DiasSolicitados),
     sumarDias(FechaInicio, DiasSolicitados, FechaVencimiento).
 
 
-calcularDiasRetraso(FechaVenc, FechaActual, DiasRetraso) :-
+
+
+
+/* RF16 >15
+calcularDiasRetraso
+ Descripción: Calcula días de retraso entre fecha de vencimiento y fecha
+ actual.
+Dom: fecha-vencimiento (string) X fecha-actual (string) X dias(int)
+ Rec: DIAS(int)
+*/
+%aux tdafecha
+calcularDiasRetraso(FechaVenc, FechaActual, Dias) :-
 
     diasTotales(FechaVenc, TotalVenc),
     diasTotales(FechaActual, TotalActual),
@@ -120,12 +246,19 @@ calcularDiasRetraso(FechaVenc, FechaActual, DiasRetraso) :-
     Diferencia is TotalActual - TotalVenc,
 
     ( Diferencia > 0 ->
-        DiasRetraso is Diferencia
+        Dias is Diferencia
     ;
-        DiasRetraso is 0
+        Dias is 0
     ).
 
 
+
+/* RF17>16
+calcularMulta
+ Descripción: Calcula multa multiplicando días de retraso por tasa diaria.
+ Dom: prestamo (Prestamo) X fecha-actual (string) X tasa-multa-diaria (int) X multa (number)
+ Rec: Multa(M)
+*/
 calcularMulta(PrestamoIn, FechaActual, Tasa, Multa) :-
 
     obtenerFechaVencimiento(PrestamoIn, FechaVencimiento),
@@ -136,6 +269,15 @@ calcularMulta(PrestamoIn, FechaActual, Tasa, Multa) :-
 
 
 
+
+/* RF18>17
+tomarPrestamo
+ Descripción: Usuario toma libro prestado, solo si cumple diversos
+ requisitos.
+Dom: biblioteca (Biblioteca) X id-usuario (int) X id-libro(int)
+X dias-solicitados (int) X fecha-actual (string) X biblioteca(Biblioteca)
+ Rec: BibliotecaOut(B)
+*/
 tomarPrestamo(BibIn, IdUsuario, IdLibro, Dias, FechaActual, BibOut) :-
 
     tdaBibliotecaGetMaxLibros(BibIn, MaxLibros),
@@ -180,7 +322,14 @@ tomarPrestamo(BibIn, IdUsuario, IdLibro, Dias, FechaActual, BibOut) :-
 
 
 
-
+/* RF19>18
+devolverLibro
+ Descripción: Devuelve un libro y procesa multas, suspende
+ automaticamente.
+Dom: biblioteca (Biblioteca) X id-usuario (int) X id-libro (int) X
+fecha-actual (string) X biblioteca (Biblioteca)
+Rec: BibliotecaOut(B)
+*/
 devolverLibro(BibIn, IdUser, IdLibro, FechaActual, BibOut) :-
     tdaBibliotecaGetPrestamos(BibIn, Prestamos),
     tdaBibliotecaGetUsuarios(BibIn, Usuarios),
@@ -220,6 +369,15 @@ devolverLibro(BibIn, IdUser, IdLibro, FechaActual, BibOut) :-
 
 
 
+
+
+/* RF20>21
+debeSuspenderse
+ Descripción: Verifica si el usuario debe suspenderse automáticamente
+ por ciertos criterios.
+Dom: biblioteca (Biblioteca) X id-usuario (int) X fecha-actual (string)
+Rec: boolean
+*/
 debeSuspenderse(Biblioteca, IdUsuario, FechaActual) :-
 
     tdaBibliotecaGetLimiteDeuda(Biblioteca, LimiteDeuda),
@@ -237,6 +395,14 @@ debeSuspenderse(Biblioteca, IdUsuario, FechaActual) :-
     ).
 
 
+
+
+/* RF21>19
+suspenderUsuario
+ Descripción: Suspende al usuario manualmente cambiando su estado a true. Si el usuario se encuentra suspendido entonces el usuario se mantiene intacto en la biblioteca de salida.
+ Dom: biblioteca (Biblioteca) X idUsuario (int) X biblioteca (Biblioteca)
+ Rec: BibliotecaOut(B)
+*/
 suspenderUsuario(BibliotecaIn, IdUsuario, BibliotecaOut) :-
 
     tdaBibliotecaGetUsuarios(BibliotecaIn, UsuariosActuales),
@@ -244,3 +410,87 @@ suspenderUsuario(BibliotecaIn, IdUsuario, BibliotecaOut) :-
     tdaBibliotecaSusU(UsuariosActuales, IdUsuario, UsuariosNuevos),
 
     tdaBibliotecaSetUsuarios(BibliotecaIn, UsuariosNuevos, BibliotecaOut).
+
+
+
+
+/* RF22>20
+renovarPrestamo
+ Descripción: Renueva préstamo agregando días extra, verifica
+ prestamo existente, usuario no suspendido, sin retrasos y que los
+ dias totales no superen el maximo.
+Dom: biblioteca (Biblioteca) X id-prestamo (int) X dias-extra (int) X
+fecha-actual (string) X biblioteca (Biblioteca)
+Rec: BibliotecaOut(B)
+*/
+renovarPrestamo(BibliotecaIn, IdPrestamo, DiasExtra, FechaActual, BibliotecaOut) :-
+
+    tdaBibliotecaGetDiasMax(BibliotecaIn, DiasMaxPermitidos),
+    tdaBibliotecaGetPrestamos(BibliotecaIn, ListaPrestamos),
+
+
+    buscarPrestamoPorID(ListaPrestamos, IdPrestamo, PrestamoOriginal),
+
+    tdaPrestamoGetIDUsuario(PrestamoOriginal, IdUsuario),
+    obtenerUsuario(BibliotecaIn, IdUsuario, Usuario),
+    \+ isUsuarioSuspendido(Usuario),
+
+
+    obtenerFechaVencimiento(PrestamoOriginal, FechaVencimiento),
+    calcularDiasRetraso(FechaVencimiento, FechaActual, DiasRetraso),
+    DiasRetraso =:= 0,
+
+
+    tdaPrestamoGetDias(PrestamoOriginal, DiasSolicitados),
+    NuevosDiasTotales is DiasSolicitados + DiasExtra,
+    NuevosDiasTotales =< DiasMaxPermitidos,
+
+
+    tdaPrestamoGetIdLibro(PrestamoOriginal, IdLibro),
+    tdaPrestamoGetFecha(PrestamoOriginal, FechaInicio),
+
+
+    crearPrestamo(IdPrestamo, IdUsuario, IdLibro, FechaInicio, NuevosDiasTotales, PrestamoRenovado),
+
+
+    tdaPrestamoActualizar(ListaPrestamos, PrestamoRenovado, PrestamosActualizados),
+    tdaBibliotecaSetPrestamos(BibliotecaIn, PrestamosActualizados, BibliotecaOut).
+
+
+
+
+/* RF23>22
+pagarDeuda
+ Descripción: Usuario paga monto para reducir deuda, actva usuario
+ sipaga el total.
+Dom: biblioteca (Biblioteca) X id-usuario (int) X monto(int)
+X biblioteca (Biblioteca)
+Rec: BibliotecaOut(B)
+*/
+pagarDeuda(BibliotecaIn, IdUsuario, Monto, BibliotecaOut) :-
+    tdaBibliotecaGetFecha(BibliotecaIn, FechaActual),
+    tdaBibliotecaGetDiasRetraso(BibliotecaIn, MaxDiasRetraso),
+    tdaBibliotecaGetPrestamos(BibliotecaIn, Prestamos),
+
+    obtenerUsuario(BibliotecaIn, IdUsuario, Usuario),
+    obtenerDeuda(Usuario, DeudaActual),
+
+    CalculoDeuda is DeudaActual - Monto,
+    (CalculoDeuda < 0 -> DeudaFinal = 0 ; DeudaFinal = CalculoDeuda),
+
+    tdaUsuarioSetDeuda(Usuario, DeudaFinal, UsuarioConDeuda),
+
+
+    ( (DeudaFinal =:= 0, \+ tienePrestamoAtrasado(Prestamos, IdUsuario, FechaActual, MaxDiasRetraso)) ->
+        NuevoEstado = activo
+    ;
+        tdaUsuarioGetEstado(Usuario, NuevoEstado)
+    ),
+
+    tdaUsuarioSetEstado(UsuarioConDeuda, NuevoEstado, UsuarioActualizado),
+
+    tdaBibliotecaGetUsuarios(BibliotecaIn, ListaUsuarios),
+    tdaUsuarioActualizarL(ListaUsuarios, UsuarioActualizado, UsuariosNuevos),
+    tdaBibliotecaSetUsuarios(BibliotecaIn, UsuariosNuevos, BibliotecaOut).
+
+
