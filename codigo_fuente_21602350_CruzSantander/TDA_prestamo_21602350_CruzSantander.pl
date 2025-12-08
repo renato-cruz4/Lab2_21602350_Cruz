@@ -1,4 +1,4 @@
-:-consult('TDA_fecha.pl').
+:-consult('TDA_fecha_21602350_CruzSantander.pl').
 
 /* TDA Prestamo Crear
  Descripción: Constructor principal del TDA Prestamo.
@@ -90,7 +90,7 @@ tdaPrestamoGetFecha(Prestamo,FechaPrestamo):-
 */
 tdaPrestamoGetDias(Prestamo,DiasSolicitados):-
     tdaPrestamoEsPrestamo(Prestamo),
-    Prestamo= [_, _, _, _, diasSolicitados(DiasSolicitados)].
+    Prestamo= [_, _, _, _, diasSolicitados(DiasSolicitados)|_].
 
 
 /* TDA Prestamo Get estado
@@ -98,9 +98,9 @@ tdaPrestamoGetDias(Prestamo,DiasSolicitados):-
  Dom: Prestamo(P)
  Rec: estado(atom)
 */
-tdaPrestamoGetDias(Prestamo,EstadoPrestamo):-
+tdaPrestamoGetEstado(Prestamo,EstadoPrestamo):-
     tdaPrestamoEsPrestamo(Prestamo),
-    Prestamo= [_, _, _, _,_,estadoPrestamo(EstadoPrestamo) ].
+    Prestamo= [_, _, _, _,_,estadoPrestamo(EstadoPrestamo)|_ ].
 
 
 

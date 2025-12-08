@@ -1,7 +1,7 @@
-:- consult('TDA_fecha.pl').
-:- consult('TDA_libro.pl').
-:- consult('TDA_usuario.pl').
-:- consult('TDA_prestamo.pl').
+:- consult('TDA_fecha_21602350_CruzSantander.pl').
+:- consult('TDA_libro_21602350_CruzSantander.pl').
+:- consult('TDA_usuario_21602350_CruzSantander.pl').
+:- consult('TDA_prestamo_21602350_CruzSantander.pl').
 
 /*TDA biblioteca : estructura "biblioteca(B)" conformada por una lista con los elementos que identifican la bibliteca
 ; entre ellos libros, usuarios, prestamos, max libros  por persona, tasa de multa
@@ -271,6 +271,26 @@ tdaBibliotecaSetPrestamos(BibliotecaIn, PrestamosNuevos, BibliotecaOut) :-
 
 
 
+/* TDA biblioteca Set Fecha
+ Descripción: funcion que modifica la fecha de una
+ biblioteca.
+Dom: bibliotecaIn(B) X NuevaFecha(string)
+Rec: bibliotecaOut(B)
+*/
+
+tdaBibliotecaSetFecha(BibliotecaIn, NuevaFecha, BibliotecaOut) :-
+                    tdaBibliotecaGetLibros(BibliotecaIn, Libros),
+                    tdaBibliotecaGetUsuarios(BibliotecaIn, Usuarios),
+                    tdaBibliotecaGetPrestamos(BibliotecaIn,Prestamos),
+                    tdaBibliotecaGetMaxLibros(BibliotecaIn, MaxLibros),
+                    tdaBibliotecaGetDiasMax(BibliotecaIn, DiasMax),
+                    tdaBibliotecaGetTasaMulta(BibliotecaIn, TasaMulta),
+                    tdaBibliotecaGetLimiteDeuda(BibliotecaIn, LimiteDeuda),
+                    tdaBibliotecaGetDiasRetraso(BibliotecaIn, DiasRetraso),
+
+                    tdaBibliotecaCrear(Libros, Usuarios, Prestamos, MaxLibros, DiasMax, TasaMulta, LimiteDeuda, DiasRetraso, NuevaFecha, BibliotecaOut).
+
+
 
 /* CheckIDLibro
  Descripción: funcion auxiliar que indica si un id fue encontrado en la
@@ -341,6 +361,58 @@ tdaBibliotecaSusU([Usuario|Resto], IdTarget, [UsuarioModificado|Resto]) :-
     tdaUsuarioSetEstado(Usuario, suspendido, UsuarioModificado).
 tdaBibliotecaSusU([Usuario|Resto], IdTarget, [Usuario|RestoModificado]) :-
     tdaBibliotecaSusU(Resto, IdTarget, RestoModificado).
+
+
+
+
+/*
+ tdaBibliotecaEscribirUsuario es una funcion auxiliar recursiva natural,
+ la cual sirve para hacer el formato de texto del historial
+*/
+tdaBibliotecaEscribirUsuario([], _, "").
+
+tdaBibliotecaEscribirUsuario([P|Resto], IdUsuario, StrFinal) :-
+    tdaPrestamoGetIDUsuario(P, IdU),
+    IdU =:= IdUsuario, !,
+
+    tdaPrestamoGetID(P, IdP),
+    tdaPrestamoGetIdLibro(P, IdL),
+    tdaPrestamoGetFecha(P, FechaInicio),
+    tdaPrestamoGetDias(P, Dias),
+    tdaPrestamoGetEstado(P, Estado),
+
+    sumarDias(FechaInicio, Dias, FechaVenc),
+
+    format(string(Linea), "Préstamo #~w - Libro ~w - Prestado: ~w - Vence: ~w - ~w\n",
+           [IdP, IdL, FechaInicio, FechaVenc, Estado]),
+
+    tdaBibliotecaEscribirUsuario(Resto, IdUsuario, StrResto),
+    string_concat(Linea, StrResto, StrFinal).
+
+tdaBibliotecaEscribirUsuario([_|Resto], IdUsuario, StrFinal) :-
+    tdaBibliotecaEscribirUsuario(Resto, IdUsuario, StrFinal).
+
+
+
+
+
+tdaBibliotecaEscribir([], "").
+
+tdaBibliotecaEscribir([P|Resto], StrFinal) :-
+    tdaPrestamoGetID(P, IdP),
+    tdaPrestamoGetIDUsuario(P, IdU),
+    tdaPrestamoGetIdLibro(P, IdL),
+    tdaPrestamoGetFecha(P, Fecha),
+    tdaPrestamoGetDias(P, Dias),
+    tdaPrestamoGetEstado(P, Estado),
+
+    format(string(Linea), "Préstamo #~w: Usuario ~w - Libro ~w - Fecha: ~w - Días: ~w - ~w\n",
+           [IdP, IdU, IdL, Fecha, Dias, Estado]),
+
+    tdaBibliotecaEscribir(Resto, StrResto),
+
+    string_concat(Linea, StrResto, StrFinal).
+
 
 
 

@@ -1,0 +1,36 @@
+RNF1. Autoevaluacion: 1
+RNF2. Lenguaje: 1
+RNF3. Version: 1
+RNF4. Standard: 1
+RNF5. Documentacion: 1
+RNF6. organizacion: 1
+RNF7. Historial: 1
+RNF8. Script: 1
+RNF9. Prerrequisitos: 1
+
+RF01    TDAs  1
+RF02	crearUsuario	1
+RF03	crearLibro	1
+RF04	crearPrestamo	1
+RF05	crearBiblioteca		1
+RF06	agregarLibro		1
+RF07	registrarUsuario		1
+RF08	obtenerUsuario		1
+RF09	buscarLibro 		1
+RF10	getLibroId		1
+RF11	getFecha		1
+RF12	isLibroDisponible		1
+RF13	isUsuarioSuspendido		1
+RF14	obtenerDeuda		1
+RF15	obtenerFechaVencimiento	1
+RF16	calcularDiasRetraso		1
+RF17	calcularMulta		1
+RF18	tomarPrestamo (Validaciones completas)	1
+RF19	devolverLibro		1
+RF20	debeSuspenderse	1
+RF21	suspenderUsuario		1
+RF22	renovarPrestamo		1
+RF23	pagarDeuda		1
+RF24	historialPrestamosUsuario		1
+RF25	historialPrestamosSistema		1
+RF26	procesarDia (Simulación temporal)		1

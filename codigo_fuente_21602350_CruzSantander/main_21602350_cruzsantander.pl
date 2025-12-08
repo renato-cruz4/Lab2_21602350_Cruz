@@ -1,8 +1,8 @@
-:- consult('TDA_fecha.pl').
-:- consult('TDA_usuario.pl').
-:- consult('TDA_libro.pl').
-:- consult('TDA_prestamo.pl').
-:- consult('TDA_biblioteca.pl').
+:- consult('TDA_fecha_21602350_CruzSantander.pl').
+:- consult('TDA_usuario_21602350_CruzSantander.pl').
+:- consult('TDA_libro_21602350_CruzSantander.pl').
+:- consult('TDA_prestamo_21602350_CruzSantander.pl').
+:- consult('TDA_biblioteca_21602350_CruzSantander.pl').
 
 
 
@@ -68,6 +68,12 @@ crearBiblioteca
  biblioteca(B)
 */
 crearBiblioteca(Libros, Usuarios, Prestamos, MaxLibros, DiasMax, TasaMulta, LimiteDeuda, DiasRetraso, FechaBiblioteca, B) :-
+    MaxLibros > 0,
+    DiasMax > 0,
+    TasaMulta >= 0,
+    LimiteDeuda >= 0,
+    DiasRetraso >= 0,
+
     B= [libros(Libros),
         usuarios(Usuarios),
         prestamos(Prestamos),
@@ -330,43 +336,26 @@ Dom: biblioteca (Biblioteca) X id-usuario (int) X id-libro (int) X
 fecha-actual (string) X biblioteca (Biblioteca)
 Rec: BibliotecaOut(B)
 */
-devolverLibro(BibIn, IdUser, IdLibro, FechaActual, BibOut) :-
+devolverLibro(BibIn, IdUser, IdLibro, _, BibOut) :-
+
     tdaBibliotecaGetPrestamos(BibIn, Prestamos),
     tdaBibliotecaGetUsuarios(BibIn, Usuarios),
     tdaBibliotecaGetLibros(BibIn, Libros),
-    tdaBibliotecaGetTasaMulta(BibIn, Tasa),
-    tdaBibliotecaGetLimiteDeuda(BibIn, LimiteDeuda),
 
     tdaPrestamoBuscar(Prestamos, IdUser, IdLibro, Prestamo),
 
-    calcularMulta(Prestamo, FechaActual, Tasa, Multa),
-
-    obtenerUsuario(BibIn, IdUser, Usuario),
-    obtenerDeuda(Usuario, DeudaActual),
-    NuevaDeuda is DeudaActual + Multa,
-
-
-    (NuevaDeuda > LimiteDeuda ->
-        NuevoEstado = suspendido
-    ;
-        tdaUsuarioGetEstado(Usuario, NuevoEstado)
-    ),
-
-    tdaUsuarioSetDeuda(Usuario, NuevaDeuda, U_Tmp1),
-    tdaUsuarioSetEstado(U_Tmp1, NuevoEstado, U_Tmp2),
-    tdaUsuarioEliminarLibro(U_Tmp2, IdLibro, UsuarioActualizado),
-
-    tdaUsuarioActualizarL(Usuarios, UsuarioActualizado, UsuariosActualizados),
+    eliminarElemento(Prestamos, Prestamo, PrestamosActualizados),
 
     tdaLibroActualizarE(Libros, IdLibro, disponible, LibrosActualizados),
 
-    eliminarElemento(Prestamos, Prestamo, PrestamosActualizados),
+    obtenerUsuario(BibIn, IdUser, Usuario),
+    tdaUsuarioEliminarLibro(Usuario, IdLibro, UsuarioActualizado),
 
+    tdaUsuarioActualizarL(Usuarios, UsuarioActualizado, UsuariosActualizados),
 
     tdaBibliotecaSetLibros(BibIn, LibrosActualizados, B_Tmp1),
     tdaBibliotecaSetUsuarios(B_Tmp1, UsuariosActualizados, B_Tmp2),
     tdaBibliotecaSetPrestamos(B_Tmp2, PrestamosActualizados, BibOut).
-
 
 
 
@@ -494,3 +483,139 @@ pagarDeuda(BibliotecaIn, IdUsuario, Monto, BibliotecaOut) :-
     tdaBibliotecaSetUsuarios(BibliotecaIn, UsuariosNuevos, BibliotecaOut).
 
 
+/* RF24>23
+ historialPrestamosUsuario
+ Descripción: Obtiene préstamos de un usuario formateados como string.
+ Retorna string vacío si el usuario no tiene préstamos.
+ Incluye encabezado y cálculo de fecha de vencimiento.
+ Dom: biblioteca (Biblioteca) X IdUsuario (int) X str (String)
+ Rec: StringSalida
+*/
+historialPrestamosUsuario(BibliotecaIn, IdUsuario, StrSalida) :-
+    tdaBibliotecaGetPrestamos(BibliotecaIn, ListaPrestamos),
+
+    tdaBibliotecaEscribirUsuario(ListaPrestamos, IdUsuario, CuerpoStr),
+
+
+    ( CuerpoStr = "" ->
+        StrSalida = ""
+    ;
+        number_string(IdUsuario, IdStr),
+        string_concat("Historial Usuario ", IdStr, S1),
+        string_concat(S1, ":\n", Header),
+        string_concat(Header, CuerpoStr, StrSalida)
+    ).
+
+
+
+
+/* RF25
+ historialPrestamosSistema
+ Descripción: Obtiene todos los préstamos del sistema formateados como string.
+ Muestra: ID préstamo, ID usuario, ID libro, fecha, días y estado.
+ Dom: biblioteca (Biblioteca) X str (String)
+ Rec: StringSalida
+*/
+historialPrestamosSistema(BibliotecaIn, StrSalida) :-
+    tdaBibliotecaGetPrestamos(BibliotecaIn, ListaPrestamos),
+    tdaBibliotecaEscribir(ListaPrestamos, StrSalida).
+
+
+
+
+
+
+
+
+
+
+/* cobrarMultasDelDia
+   Recorre todos los préstamos activos. si un prestamo está vencido le
+   suma la Tasa de multa, usa recursion de cola
+*/
+cobrarMultasDelDia([], Usuarios, _, _, Usuarios).
+
+cobrarMultasDelDia([Prestamo|RestoPrestamos], UsuariosIn, FechaActual, Tasa, UsuariosOut) :-
+    ( prestamoEstaVencido(Prestamo, FechaActual) ->
+        tdaPrestamoGetIDUsuario(Prestamo, IdUser),
+        aplicarMultaUsuario(UsuariosIn, IdUser, Tasa, UsuariosTmp)
+    ;
+        UsuariosTmp = UsuariosIn
+    ),
+    cobrarMultasDelDia(RestoPrestamos, UsuariosTmp, FechaActual, Tasa, UsuariosOut).
+
+
+
+/* prestamoEstaVencido
+   Retorna true si la FechaActual es mayor a la fecha de vencimiento.
+*/
+prestamoEstaVencido(Prestamo, FechaActual) :-
+    tdaPrestamoGetFecha(Prestamo, FechaInicio),
+    tdaPrestamoGetDias(Prestamo, DiasSolicitados),
+    sumarDias(FechaInicio, DiasSolicitados, FechaVencimiento),
+
+    diasTotales(FechaVencimiento, TotalVenc),
+    diasTotales(FechaActual, TotalHoy),
+    TotalHoy > TotalVenc.
+
+
+
+/* aplicarMultaUsuario
+   Busca un usuario por ID en la lista Usuario y aumenta su deuda
+*/
+aplicarMultaUsuario([User|Resto], IdTarget, Monto, [UserMod|Resto]) :-
+    tdaUsuarioGetID(User, IdCurrent),
+    IdCurrent =:= IdTarget, !,
+
+    tdaUsuarioGetDeuda(User, DeudaActual),
+    NuevaDeuda is DeudaActual + Monto,
+    tdaUsuarioSetDeuda(User, NuevaDeuda, UserMod).
+
+aplicarMultaUsuario([User|Resto], IdTarget, Monto, [User|RestoMod]) :-
+    aplicarMultaUsuario(Resto, IdTarget, Monto, RestoMod).
+
+
+
+
+/* actualizarEstadoUsuarios
+   Descripción: Recorre la lista de usuarios y verifica si deben suspenderse
+   con la nueva fecha
+   Dom: ListaUsuarios(list) X BiblioRef(Biblioteca) X NuevaFecha(string)
+   Rec: ListaUsuariosActualizada(list)
+   Tipo de recursion:de cola
+*/
+actualizarEstadoUsuarios([], _, _, []).
+
+actualizarEstadoUsuarios([Usuario|Resto], BiblioRef, NuevaFecha, [UsuarioOut|RestoOut]) :-
+    tdaUsuarioGetID(Usuario, IdUser),
+
+    ( debeSuspenderse(BiblioRef, IdUser, NuevaFecha) ->
+        tdaUsuarioSetEstado(Usuario, suspendido, UsuarioOut)
+    ;
+        UsuarioOut = Usuario
+    ),
+    actualizarEstadoUsuarios(Resto, BiblioRef, NuevaFecha, RestoOut).
+
+
+/* RF26>25
+procesarDia
+ Descripción: Cobra multas diarias a préstamos vencidos, avanza la fecha
+ y actualiza suspensiones, el orden es importante porque debe cambiar
+ la fecha antes de los neuvos cobro.
+*/
+procesarDia(BibliotecaIn, BibliotecaOut) :-
+    tdaBibliotecaGetFecha(BibliotecaIn, FechaActual),
+    tdaBibliotecaGetPrestamos(BibliotecaIn, Prestamos),
+    tdaBibliotecaGetUsuarios(BibliotecaIn, UsuariosIn),
+    tdaBibliotecaGetTasaMulta(BibliotecaIn, Tasa),
+
+    tdaFechaPasar(FechaActual, NuevaFecha),
+
+    tdaBibliotecaSetFecha(BibliotecaIn, NuevaFecha, BiblioConFecha),
+
+
+    cobrarMultasDelDia(Prestamos, UsuariosIn, NuevaFecha, Tasa, UsuariosConDeuda),
+
+    actualizarEstadoUsuarios(UsuariosConDeuda, BiblioConFecha, NuevaFecha, UsuariosFinales),
+
+    tdaBibliotecaSetUsuarios(BiblioConFecha, UsuariosFinales, BibliotecaOut).
