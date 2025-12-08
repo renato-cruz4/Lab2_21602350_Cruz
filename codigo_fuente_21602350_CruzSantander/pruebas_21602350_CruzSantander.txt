@@ -1,0 +1,92 @@
+set_prolog_flag(answer_write_options,[max_depth(0)]),
+ 
+
+    % --- CONFIGURACIÓN: 1 de Abril ---
+    fecha(2025, 04, 01, F_INI),
+    
+    crearUsuario(10, "Alicia", U1),
+    crearUsuario(20, "Beto", U2),
+    crearUsuario(30, "Carla", U3),
+    
+    crearLibro(100, "Cien Años de Seriedad", "Yo", L1),
+    crearLibro(200, "El Principito", "Saint-Exupery", L2),
+    crearLibro(300, "Dune", "Frank Herbert", L3),
+    
+    % Config: Max 2 libros, 7 días prestamo, Multa $50, DeudaMax $1000
+    crearBiblioteca([L1, L2, L3], [U1, U2, U3], [], 2, 7, 50, 1000, 2, F_INI, B0),
+    
+    write("--- [01/04] INICIO DE OPERACIONES ---\n"),
+    write("Alicia toma 'Cien Años' (7 días). Beto toma 'Principito' (5 días).\n"),
+    tomarPrestamo(B0, 10, 100, 7, F_INI, B1), 
+    tomarPrestamo(B1, 20, 200, 5, F_INI, B2), 
+
+    % --- PASAN 4 DÍAS (Del 01 al 05) ---
+    write("... Pasando 4 días ...\n"),
+    procesarDia(B2, B3), % 02/04
+    procesarDia(B3, B4), % 03/04
+    procesarDia(B4, B5), % 04/04
+    procesarDia(B5, B6), % 05/04
+    
+    getFecha(B6, F_05),
+    format("--- [~w] CAMBIO DE LIBROS ---\n", [F_05]),
+    
+    write("Alicia devuelve su libro temprano.\n"),
+    devolverLibro(B6, 10, 100, F_05, B7),
+    
+    write("Carla (nueva) toma el libro que dejó Alicia.\n"),
+    tomarPrestamo(B7, 30, 100, 7, F_05, B8),
+    
+    % --- PASAN 5 DÍAS MÁS (Del 05 al 10) ---
+    % Nota: El préstamo de Beto vencía el día 6 (5 días plazo). Se va a atrasar.
+    write("... Pasando 5 días (Beto entra en mora) ...\n"),
+    procesarDia(B8, B9),  % 06/04 (Vence Beto)
+    procesarDia(B9, B10), % 07/04 (Mora 1)
+    procesarDia(B10, B11),% 08/04 (Mora 2)
+    procesarDia(B11, B12),% 09/04 (Mora 3)
+    procesarDia(B12, B13),% 10/04 (Mora 4)
+
+    getFecha(B13, F_10),
+    format("--- [~w] GESTIÓN DE DEUDAS ---\n", [F_10]),
+    
+    write("Beto devuelve 'El Principito' con 4 días de retraso.\n"),
+    devolverLibro(B13, 20, 200, F_10, B14),
+    
+    obtenerUsuario(B14, 20, U_Beto_Moroso),
+    obtenerDeuda(U_Beto_Moroso, DeudaBeto),
+    format(">> Multa generada para Beto: $~w\n", [DeudaBeto]),
+    
+    write("Alicia toma prestado 'Dune'.\n"),
+    tomarPrestamo(B14, 10, 300, 7, F_10, B15),
+
+    % --- PASAN 7 DÍAS MÁS (Del 10 al 17) ---
+    write("... Pasando una semana completa ...\n"),
+    procesarDia(B15, B16), % 11
+    procesarDia(B16, B17), % 12
+    procesarDia(B17, B18), % 13
+    procesarDia(B18, B19), % 14
+    procesarDia(B19, B20), % 15
+    procesarDia(B20, B21), % 16
+    procesarDia(B21, B22), % 17/04
+
+    getFecha(B22, F_17),
+    format("--- [~w] CIERRE Y PAGOS ---\n", [F_17]),
+    
+    write("Carla devuelve 'Cien Años' (con retraso, vencía el 12).\n"),
+    devolverLibro(B22, 30, 100, F_17, B23),
+    
+    write("Beto paga su deuda completa ($200) para volver a pedir.\n"),
+    pagarDeuda(B23, 20, 200, B24),
+    
+    write("Beto (rehabilitado) pide 'Cien Años' nuevamente.\n"),
+    (tomarPrestamo(B24, 20, 100, 3, F_17, B25) ->
+        write(">> Éxito: Beto pudo pedir el libro.\n")
+    ;
+        write(">> Error: Beto sigue bloqueado.\n")
+    ),
+
+    write("\n--- GENERANDO REPORTE FINAL DEL SISTEMA ---\n"),
+    historialPrestamosSistema(B25, Reporte),
+    write(Reporte),
+    
+    write("===============================================================\n"),
+    write("       FIN DEL SCRIPT\n"),
